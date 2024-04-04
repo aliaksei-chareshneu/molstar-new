@@ -18,11 +18,12 @@ import { MolViewSpec } from '../../extensions/mvs/behavior';
 import { loadMVSX } from '../../extensions/mvs/components/formats';
 import { loadMVS } from '../../extensions/mvs/load';
 import { MVSData } from '../../extensions/mvs/mvs-data';
+import { NewVolseg, NewVolsegVolumeServerConfig } from '../../extensions/volseg/new-volumes-and-segmentations';
 import { PDBeStructureQualityReport } from '../../extensions/pdbe';
 import { RCSBValidationReport } from '../../extensions/rcsb';
 import { AssemblySymmetry, AssemblySymmetryConfig } from '../../extensions/assembly-symmetry';
 import { SbNcbrPartialCharges, SbNcbrPartialChargesPreset, SbNcbrPartialChargesPropertyProvider } from '../../extensions/sb-ncbr';
-import { Volseg, VolsegVolumeServerConfig } from '../../extensions/volumes-and-segmentations';
+import { VolsegVolumeServerConfig } from '../../extensions/volumes-and-segmentations';
 import { wwPDBChemicalComponentDictionary } from '../../extensions/wwpdb/ccd/behavior';
 import { wwPDBStructConnExtensionFunctions } from '../../extensions/wwpdb/struct-conn';
 import { ZenodoImport } from '../../extensions/zenodo';
@@ -56,6 +57,9 @@ import { Asset } from '../../mol-util/assets';
 import { Color } from '../../mol-util/color';
 import '../../mol-util/polyfill';
 import { ObjectKeys } from '../../mol-util/type-helpers';
+// import { VisualizeStaticQueryZip, processCvsxAnnotationsFile, processCvsxFile, processCvsxGeometricSegmentationFile, processCvsxMetadataFile } from '../../extensions/volseg/cvsx-extension';
+import { loadCVSXFromAnything } from '../../extensions/volseg/cvsx-extension';
+import { CVSXSpec } from '../../extensions/volseg/cvsx-extension/behaviour';
 
 export { PLUGIN_VERSION as version } from '../../mol-plugin/version';
 export { consoleStats, setDebugMode, setProductionMode, setTimingMode } from '../../mol-util/debug';
@@ -65,7 +69,9 @@ const CustomFormats = [
 ];
 
 export const ExtensionMap = {
-    'volseg': PluginSpec.Behavior(Volseg),
+    // 'volseg': PluginSpec.Behavior(Volseg),
+    // 'visualize-static-query-zip': PluginSpec.Behavior(VisualizeStaticQueryZip),
+    'new-volseg': PluginSpec.Behavior(NewVolseg),
     'backgrounds': PluginSpec.Behavior(Backgrounds),
     'dnatco-ntcs': PluginSpec.Behavior(DnatcoNtCs),
     'pdbe-structure-quality-report': PluginSpec.Behavior(PDBeStructureQualityReport),
@@ -81,6 +87,7 @@ export const ExtensionMap = {
     'sb-ncbr-partial-charges': PluginSpec.Behavior(SbNcbrPartialCharges),
     'wwpdb-chemical-component-dictionary': PluginSpec.Behavior(wwPDBChemicalComponentDictionary),
     'mvs': PluginSpec.Behavior(MolViewSpec),
+    'cvsx': PluginSpec.Behavior(CVSXSpec)
 };
 
 const DefaultViewerOptions = {
@@ -117,6 +124,7 @@ const DefaultViewerOptions = {
     emdbProvider: PluginConfig.Download.DefaultEmdbProvider.defaultValue,
     saccharideCompIdMapType: 'default' as SaccharideCompIdMapType,
     volumesAndSegmentationsDefaultServer: VolsegVolumeServerConfig.DefaultServer.defaultValue,
+    newVolumesAndSegmentationsDefaultServer: NewVolsegVolumeServerConfig.DefaultServer.defaultValue,
     rcsbAssemblySymmetryDefaultServerType: AssemblySymmetryConfig.DefaultServerType.defaultValue,
     rcsbAssemblySymmetryDefaultServerUrl: AssemblySymmetryConfig.DefaultServerUrl.defaultValue,
     rcsbAssemblySymmetryApplyColors: AssemblySymmetryConfig.ApplyColors.defaultValue,
@@ -195,6 +203,7 @@ export class Viewer {
                 [PluginConfig.Structure.DefaultRepresentationPreset, ViewerAutoPreset.id],
                 [PluginConfig.Structure.SaccharideCompIdMapType, o.saccharideCompIdMapType],
                 [VolsegVolumeServerConfig.DefaultServer, o.volumesAndSegmentationsDefaultServer],
+                [NewVolsegVolumeServerConfig.DefaultServer, o.newVolumesAndSegmentationsDefaultServer],
                 [AssemblySymmetryConfig.DefaultServerType, o.rcsbAssemblySymmetryDefaultServerType],
                 [AssemblySymmetryConfig.DefaultServerUrl, o.rcsbAssemblySymmetryDefaultServerUrl],
                 [AssemblySymmetryConfig.ApplyColors, o.rcsbAssemblySymmetryApplyColors],
@@ -466,7 +475,6 @@ export class Viewer {
             .commit();
 
         const preset = await plugin.builders.structure.hierarchy.applyPreset(trajectory, params.preset ?? 'default');
-
         return { model, coords, preset };
     }
 
@@ -485,6 +493,19 @@ export class Viewer {
             throw new Error(`Unknown MolViewSpec format: ${format}`);
         }
     }
+
+
+    async loadCvsxFromUrl(urlString: string, format: 'cvsx') {
+        if (format === 'cvsx') {
+            const data = await this.plugin.builders.data.download({ url: urlString, isBinary: true });
+
+            loadCVSXFromAnything(this.plugin, data);
+        } else {
+            throw new Error(`Unknown cvsx format: ${format}`);
+        }
+        // We might add more formats in the future
+    }
+
 
     /** Load MolViewSpec from `data`.
      * If `format` is 'mvsj', `data` must be a string or a Uint8Array containing a UTF8-encoded string.
