@@ -49,15 +49,6 @@ export async function loadCVSXFromAnything(plugin: PluginContext, data: StateObj
             }
         }
         await entryNode.data.updateStateNode({ channelsData: [...updatedChannelsData] });
-        // }
-        // NOTE: there can be the case that 
-        // there are two segmentation kinds for that entry in metadata
-        // but in CVSX file there we requested just one of them
-        // TODO: fix that 
-        // TODO: should be based on files not on metadata
-        // we have index, so can do it
-        // same with segmentation ids etc.
-        // const hasLattices = entryData.metadata!.value!.hasLatticeSegmentations();
         const hasLattices = entryData.filesData?.latticeSegmentations;
         if (hasLattices) {
             // let segmentationIds = hasLattices.segmentation_ids;

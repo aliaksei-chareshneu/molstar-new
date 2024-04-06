@@ -4,12 +4,9 @@
  * @author Adam Midlik <midlik@gmail.com>
  */
 
-import { PluginContext } from '../../../../mol-plugin/context';
 import { Color } from '../../../../mol-util/color';
-import { parseCVSXJSON } from '../../common';
-import { CVSXGeometricSegmentationData, CVSXMeshSegmentationData, QueryArgs } from '../../cvsx-extension/data';
 import { objectToArray } from '../helpers';
-import { DescriptionData, GridMetadata, Metadata, ParsedSegmentKey, ShapePrimitiveData } from './data';
+import { DescriptionData, Metadata, ParsedSegmentKey, ShapePrimitiveData } from './data';
 
 
 export function compareTwoObjects(object1: any, object2: any): boolean {

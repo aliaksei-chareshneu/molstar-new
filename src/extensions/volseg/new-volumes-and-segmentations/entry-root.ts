@@ -339,7 +339,7 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             const condition = cvsxFilesIndex.meshSegmentations;
             if (condition) {
                 debugger;
-                rawMeshSegmentations = [];
+                rawMeshSegmentations = new Array<[string, Uint8Array]>;
                 for (const meshSegmentation of condition) {
                     const targetData = zf.filter(z => {
                         const filenames = meshSegmentation.segmentsFilenames;
