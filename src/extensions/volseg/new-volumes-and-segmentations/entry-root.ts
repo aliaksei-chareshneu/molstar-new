@@ -21,8 +21,8 @@ import { ParamDefinition } from '../../../mol-util/param-definition';
 import { isMeshlistData, MeshlistData, VolsegMeshSegmentation } from '../new-meshes/mesh-extension';
 
 import { DEFAULT_VOLSEG_SERVER, VolumeApiV2 } from './volseg-api/api';
-import { DescriptionData, Metadata, SegmentAnnotationData, ShapePrimitiveData, TimeInfo } from './volseg-api/data';
-import { createSegmentKey, getCVSXGeometricSegmentationDataFromRaw, getCVSXMeshSegmentationDataFromRaw, getSegmentLabelsFromDescriptions, instanceOfShapePrimitiveData, MetadataWrapper, parseSegmentKey } from './volseg-api/utils';
+import { AnnotationMetadata, DescriptionData, GridMetadata, Metadata, SegmentAnnotationData, ShapePrimitiveData, TimeInfo } from './volseg-api/data';
+import { createSegmentKey, getSegmentLabelsFromDescriptions, instanceOfShapePrimitiveData, MetadataWrapper, parseSegmentKey } from './volseg-api/utils';
 import { DEFAULT_MESH_DETAIL, VolsegMeshSegmentationData } from './entry-meshes';
 import { VolsegModelData } from './entry-models';
 import { VolsegLatticeSegmentationData } from './entry-segmentation';
@@ -40,7 +40,7 @@ import { CreateShapePrimitiveProviderParamsValues, isShapePrimitiveParamsValues,
 import { actionSelectSegment, parseCVSXJSON } from '../common';
 import { RuntimeContext } from '../../../mol-task';
 import { unzip } from '../../../mol-util/zip/zip';
-import { CVSXFilesData, CVSXLatticeSegmentationData, CVSXVolumeData, QueryArgs } from '../cvsx-extension/data';
+import { CVSXData, CVSXFilesData, CVSXFilesIndex, QueryArgs } from '../cvsx-extension/data';
 import { SourceChoice } from '../common';
 import { Source } from '../common';
 
@@ -306,23 +306,65 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
 
     static async createFromFile(plugin: PluginContext, file: Uint8Array, runtimeCtx: RuntimeContext) {
         const zippedFiles: { [path: string]: Uint8Array } = await unzip(runtimeCtx, file.buffer) as typeof zippedFiles;
-        const zippedFilesEntries = Object.entries(zippedFiles);
-        const annotationJSONEntry = zippedFilesEntries.find(z => z[0] === 'annotations.json');
-        const metadataJSONEntry = zippedFilesEntries.find(z => z[0] === 'metadata.json');
-        const rawQueryJSON = zippedFilesEntries.find(z => z[0] === 'query.json');
-        const rawVolumes = zippedFilesEntries.filter(z => z[0].startsWith('volume'));
-        const rawLatticeSegmentations = zippedFilesEntries.filter(z => z[0].startsWith('lattice'));
-        const rawMeshSegmentations = zippedFilesEntries.filter(z => z[0].startsWith('mesh'));
-        debugger;
-        const geometricSegmentations = zippedFilesEntries.filter(z => z[0].startsWith('primitive'));
-        const parsedQueryJSON: QueryArgs = await parseCVSXJSON(rawQueryJSON!, plugin);
+        const zf = Object.entries(zippedFiles);
+
+        const indexJsonEntry = zf.find(z => z[0] === 'index.json');
+        if (!indexJsonEntry) {
+            throw new Error('No index.json found, CVSX has wrong content');
+        }
+
+        const cvsxFilesIndex: CVSXFilesIndex = await parseCVSXJSON(indexJsonEntry, plugin);
+
+        // obligatory components
+        const rawQueryJSON = zf.find(z => z[0] === cvsxFilesIndex.query);
+        const metadataJSONEntry = zf.find(z => z[0] === cvsxFilesIndex.metadata);
+        const annotationJSONEntry = zf.find(z => z[0] === cvsxFilesIndex.annotations);
+
+        //
+        const rawVolumes = zf.filter(z => cvsxFilesIndex.volumes.hasOwnProperty(z[0]));
+
+
+        // TODO: refactor - separate function
+        let rawLatticeSegmentations, rawMeshSegmentations, rawGeometricSegmentations;
+        if (cvsxFilesIndex.latticeSegmentations) {
+            const condition = cvsxFilesIndex.latticeSegmentations;
+            rawLatticeSegmentations = zf.filter(z => condition.hasOwnProperty(z[0]));
+        }
+        if (cvsxFilesIndex.geometricSegmentations) {
+            const condition = cvsxFilesIndex.geometricSegmentations;
+            rawGeometricSegmentations = zf.filter(z => condition.hasOwnProperty(z[0]));
+        }
+        if (cvsxFilesIndex.meshSegmentations) {
+            // wrong, should just filter if includes in segmentsFilenames
+            const condition = cvsxFilesIndex.meshSegmentations;
+            if (condition) {
+                debugger;
+                rawMeshSegmentations = [];
+                for (const meshSegmentation of condition) {
+                    const targetData = zf.filter(z => {
+                        const filenames = meshSegmentation.segmentsFilenames;
+                        if (filenames.includes(z[0])) {
+                            return z;
+                        }
+                    });
+                    rawMeshSegmentations = rawMeshSegmentations.concat(targetData);
+                }
+            };
+        }
+        if (!rawQueryJSON || !metadataJSONEntry || !annotationJSONEntry) {
+            throw new Error('CVSX has wrong content, some components are missing');
+        }
+
+        // do parsing
+        const parsedQueryJSON: QueryArgs = await parseCVSXJSON(rawQueryJSON, plugin);
+
         let params: VolsegEntryParamValues = {
             serverUrl: '',
             source: parsedQueryJSON.source_db,
             entryId: parsedQueryJSON.entry_id,
         };
-        const parsedGridMetadata = await parseCVSXJSON(metadataJSONEntry!, plugin);
-        const parsedAnnotationMetadata = await parseCVSXJSON(annotationJSONEntry!, plugin);
+        const parsedGridMetadata: GridMetadata = await parseCVSXJSON(metadataJSONEntry, plugin);
+        const parsedAnnotationMetadata: AnnotationMetadata = await parseCVSXJSON(annotationJSONEntry, plugin);
         const source: Source = parsedGridMetadata.entry_id.source_db_name;
         const entryId = parsedGridMetadata.entry_id.source_db_id;
         params = {
@@ -334,35 +376,14 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             grid: parsedGridMetadata,
             annotation: parsedAnnotationMetadata
         };
-        let gs = undefined;
-        if (geometricSegmentations) {
-            gs = await getCVSXGeometricSegmentationDataFromRaw(geometricSegmentations, parsedGridMetadata, parsedQueryJSON, plugin);
-        }
-
-        const meshSegmentationData = getCVSXMeshSegmentationDataFromRaw(rawMeshSegmentations, parsedGridMetadata, parsedQueryJSON);
-        debugger;
+        const cvsxData = new CVSXData(cvsxFilesIndex, plugin);
         const filesData: CVSXFilesData = {
-            // parsed everything
-            volumes: rawVolumes ? rawVolumes.map(v => {
-                const d: CVSXVolumeData = {
-                    channelId: v[0].split('_')[1],
-                    timeframeIndex: parseInt(v[0].split('_')[2]),
-                    data: v[1]
-                };
-                return d;
-            }) : undefined,
-            latticeSegmentations: rawLatticeSegmentations ? rawLatticeSegmentations.map(v => {
-                const d: CVSXLatticeSegmentationData = {
-                    segmentationId: v[0].split('_')[1],
-                    timeframeIndex: parseInt(v[0].split('_')[2]),
-                    data: v[1]
-                };
-                return d;
-            }) : undefined,
-            geometricSegmentations: gs ? gs : undefined,
-            meshSegmentations: meshSegmentationData ? meshSegmentationData : undefined,
-            annotation: parsedAnnotationMetadata ? parsedAnnotationMetadata : undefined,
-            metadata: parsedGridMetadata ? parsedGridMetadata : undefined,
+            volumes: cvsxData.volumeDataFromRaw(rawVolumes),
+            latticeSegmentations: cvsxData.latticeSegmentationDataFromRaw(rawLatticeSegmentations),
+            meshSegmentations: cvsxData.meshSegmentationDataFromRaw(rawMeshSegmentations),
+            geometricSegmentations: await cvsxData.geometricSegmentationDataFromRaw(rawGeometricSegmentations),
+            annotations: parsedAnnotationMetadata,
+            metadata: parsedGridMetadata,
             query: parsedQueryJSON
         };
         const result = new VolsegEntryData(plugin, params, filesData);
@@ -749,7 +770,10 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
     preloadMeshTimeframesDataFromFile() {
         debugger;
         if (this.filesData!.meshSegmentations) {
+            debugger;
+            // again, no data
             for (const segmentationData of this.filesData!.meshSegmentations) {
+                debugger;
                 const segmentsData: RawMeshSegmentData[] = [];
                 const rawData = segmentationData.data;
                 for (const [filename, d] of rawData) {

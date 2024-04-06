@@ -48,7 +48,12 @@ export async function loadCVSXFromAnything(plugin: PluginContext, data: StateObj
             }
             await entryNode.data.updateStateNode({ channelsData: [...updatedChannelsData] });
         }
-
+        // NOTE: there can be the case that 
+        // there are two segmentation kinds for that entry in metadata
+        // but in CVSX file there we requested just one of them
+        // TODO: fix that 
+        // TODO: should be based on files not on metadata
+        // we have index, so can do it
         const hasLattices = entryData.metadata!.value!.hasLatticeSegmentations();
         if (hasLattices) {
             let segmentationIds = hasLattices.segmentation_ids;
@@ -115,6 +120,7 @@ export async function loadCVSXFromAnything(plugin: PluginContext, data: StateObj
                     segmentationId: segmentationId,
                     timeframeIndex: timeframeIndex
                 };
+                debugger;
                 const meshNode = await plugin.build().to(group).apply(ProjectMeshData, meshParams, { tags: [MESH_SEGMENTATION_NODE_TAG] }).commit();
                 await entryNode.data.meshSegmentationData.createMeshRepresentation3D(meshNode, meshParams);
             }
