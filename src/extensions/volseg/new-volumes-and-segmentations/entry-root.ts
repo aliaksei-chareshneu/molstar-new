@@ -771,7 +771,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
         debugger;
         if (this.filesData!.meshSegmentations) {
             debugger;
-            // again, no data
             for (const segmentationData of this.filesData!.meshSegmentations) {
                 debugger;
                 const segmentsData: RawMeshSegmentData[] = [];
