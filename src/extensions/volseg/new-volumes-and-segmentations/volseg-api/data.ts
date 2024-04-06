@@ -4,7 +4,8 @@
  * @author Adam Midlik <midlik@gmail.com>
  */
 
-import { Vec3 } from '../../../../mol-math/linear-algebra'
+import { Vec3 } from '../../../../mol-math/linear-algebra';
+import { Source } from '../../common';
 
 export interface GeometricSegmentationData {
     segmentation_id: string
@@ -117,11 +118,6 @@ export interface MeshComponentNumbers {
     }
 }
 
-export interface EntryId {
-    source_db_name: string
-    source_db_id: string
-}
-
 export interface GeometricSegmentationSetsMetadata {
     segmentation_ids: string[]
     // maps set ids to time info
@@ -197,7 +193,7 @@ export interface SegmentationLatticesMetadata {
 }
 
 export interface EntryId {
-    source_db_name: string
+    source_db_name: Source
     source_db_id: string
 }
 
