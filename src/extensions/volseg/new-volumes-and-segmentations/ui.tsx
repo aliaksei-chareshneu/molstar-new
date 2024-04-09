@@ -158,7 +158,7 @@ function VolsegEntryControls({ entryData }: { entryData: VolsegEntryData }) {
         {entryDescriptions.length > 0 && entryDescriptions.map(e =>
             <EntryDescriptionUI key={e.id} entryDescriptionData={e}></EntryDescriptionUI>)}
         {/* <JSONEditorComponent jsonData={annotationsJson} entryData={entryData}/> */}
-        <Popup nested trigger={<Button>Open annotation JSON editor</Button>} modal>
+        <Popup nested trigger={<Button>Annotation Editor</Button>} modal>
             {/* <span> Modal content </span> */}
             {/* TODO: fix this */}
 
