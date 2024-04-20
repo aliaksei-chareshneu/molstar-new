@@ -4,6 +4,7 @@
  * @author Adam Midlik <midlik@gmail.com>
  */
 import { CIF } from '../../../mol-io/reader/cif';
+import { DensityServer_Data_Schema } from '../../../mol-io/reader/cif/schema/density-server';
 import { volumeFromDensityServerData } from '../../../mol-model-formats/volume/density-server';
 import { volumeFromSegmentationData } from '../../../mol-model-formats/volume/segmentation';
 import { PluginStateObject } from '../../../mol-plugin-state/objects';
@@ -69,6 +70,10 @@ export const ProjectVolumeData = CreateTransformer({
             const volume = await volumeFromDensityServerData(volumeCif).runInContext(ctx);
             const [x, y, z] = volume.grid.cells.space.dimensions;
             const props = { label: `Volume channel: ${label}`, description: `Volume ${x}\u00D7${y}\u00D7${z}` };
+            const volumedata3dinfo = volume.sourceData.data as DensityServer_Data_Schema;
+            const samplerate: any = volumedata3dinfo.volume_data_3d_info.sample_rate;
+            const downsampling: number = samplerate.__array[0];
+            entryData.metadata.value!.setCurrentlyUsedVolumeDownsampling(downsampling);
             return new PluginStateObject.Volume.Data(volume, props);
         });
     }

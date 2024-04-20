@@ -131,9 +131,14 @@ export interface VolumesMetadata {
     volume_sampling_info: VolumeSamplingInfo
 }
 
+export interface DownsamplingLevelInfo {
+    level: number
+    available: boolean
+}
+
 export interface SamplingInfo {
     // Info about 'downsampling dimension'
-    spatial_downsampling_levels: number[]
+    spatial_downsampling_levels: DownsamplingLevelInfo[]
     boxes: { [downsampling: number]: SamplingBox }
     time_transformations: TimeTransformation[]
     // e.g. (0, 1, 2) as standard

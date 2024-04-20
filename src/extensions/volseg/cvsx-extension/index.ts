@@ -24,8 +24,6 @@ export async function loadCVSXFromAnything(plugin: PluginContext, data: StateObj
         if (entryData.filesData!.query.time) {
             timeframeIndex = entryData.filesData!.query.time;
         }
-        // const hasVolumes = entryNode.data.metadata.value!.raw.grid.volumes.volume_sampling_info.spatial_downsampling_levels.length > 0;
-        // if (hasVolumes) {
         // always has Volumes
         const group = await entryNode.data.volumeData.createVolumeGroup();
         const updatedChannelsData = [];

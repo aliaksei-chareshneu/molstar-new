@@ -27,9 +27,19 @@ export function compareTwoObjects(object1: any, object2: any): boolean {
 export class MetadataWrapper {
     raw: Metadata;
     private segmentMap?: Map<string, DescriptionData[]>;
+    private currentlyUsedVolumeDownsampling?: number;
 
     constructor(rawMetadata: Metadata) {
         this.raw = rawMetadata;
+    }
+
+    setCurrentlyUsedVolumeDownsampling(n: number) {
+        this.currentlyUsedVolumeDownsampling = n;
+    }
+
+    get currentVolumeDownsampling() {
+        if (this.currentlyUsedVolumeDownsampling) return this.currentlyUsedVolumeDownsampling;
+        throw Error('Currently used volume downsampling is not set');
     }
 
     hasLatticeSegmentations() {
@@ -297,18 +307,16 @@ export class MetadataWrapper {
     // }
 
     get gridTotalVolume() {
-        const sortedResolutions = this.raw.grid.volumes.volume_sampling_info.spatial_downsampling_levels.sort((n1, n2) => n1 - n2);
-        const firstAvailableResolution = sortedResolutions[0];
-        console.log('firstAvailableResolution', firstAvailableResolution);
-        const [vx, vy, vz] = this.raw.grid.volumes.volume_sampling_info.boxes[firstAvailableResolution].voxel_size;
-        const [gx, gy, gz] = this.raw.grid.volumes.volume_sampling_info.boxes[firstAvailableResolution].grid_dimensions;
+        const currentVolumeDownsampling = this.currentVolumeDownsampling;
+        console.log('currentVolumeDownsampling', currentVolumeDownsampling);
+        const [vx, vy, vz] = this.raw.grid.volumes.volume_sampling_info.boxes[currentVolumeDownsampling].voxel_size;
+        const [gx, gy, gz] = this.raw.grid.volumes.volume_sampling_info.boxes[currentVolumeDownsampling].grid_dimensions;
         return vx * vy * vz * gx * gy * gz;
     }
 
 }
 
 export function instanceOfShapePrimitiveData(object: any): object is ShapePrimitiveData {
-    debugger;
     return 'shape_primitive_list' in object;
 }
 
