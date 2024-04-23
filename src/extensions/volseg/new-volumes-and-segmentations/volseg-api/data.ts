@@ -255,7 +255,7 @@ export interface SegmentAnnotationData {
 }
 
 export interface ExternalReference {
-    id: number
+    id: string
     resource?: string
     accession?: string
     label?: string,

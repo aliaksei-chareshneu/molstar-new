@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import JSONEditor, { JSONEditorOptions } from 'jsoneditor';
 import 'jsoneditor/dist/jsoneditor.css';
-import { Card } from 'primereact/card';
 import { VolsegEntryData } from './entry-root';
 import { Button } from '../../../mol-plugin-ui/controls/common';
 import { AnnotationMetadata } from './volseg-api/data';
