@@ -36,6 +36,7 @@ import { VolsegMeshSegmentation } from '../new-meshes/mesh-extension';
 import { findNodesByRef } from '../common';
 import { DescriptionsList, EntryDescriptionUI, SelectedSegmentDescription } from '../common-ui';
 import { JSONEditorComponent } from './jsoneditor-component';
+import { combineLatest } from 'rxjs';
 
 interface VolsegUIData {
     globalState?: VolsegGlobalStateData,
@@ -92,20 +93,17 @@ export class VolsegUI extends CollapsableControls<{}, { data: VolsegUIData }> {
     componentDidMount(): void {
         this.setState({ isHidden: true, isCollapsed: false });
         this.syncState(this.plugin.state.data);
-        this.subscribe(this.plugin.state.data.events.changed, e => {
-            // this.plugin.behaviors.state.
-            this.syncState(e.state);
-            // const nodes = e.state.selectQ(q => q.ofType(VolsegEntry)).map(cell => cell?.obj).filter(isDefined);
-            // const isHidden = nodes.length === 0;
-            // const newData = VolsegUIData.changeAvailableNodes(this.state.data, nodes);
-            // if (!this.state.data.globalState?.isRegistered()) {
-            //     const globalState = e.state.selectQ(q => q.ofType(VolsegGlobalState))[0]?.obj?.data;
-            //     if (globalState) newData.globalState = globalState;
-            // }
-            // if (!VolsegUIData.equals(this.state.data, newData) || this.state.isHidden !== isHidden) {
-            //     this.setState({ data: newData, isHidden: isHidden });
-            // }
-        });
+        this.subscribe(
+            combineLatest([
+                this.plugin.state.data.events.changed,
+                this.plugin.behaviors.state.isAnimating,
+            ]),
+            ([e, isAnimating]) => {
+                if (isAnimating) return;
+
+                this.syncState(e.state);
+            },
+        );
     }
 }
 
