@@ -25,7 +25,7 @@ import { SimpleVolumeParams, SimpleVolumeParamValues } from './entry-volume';
 import { VolsegGlobalState, VolsegGlobalStateData, VolsegGlobalStateParams } from './global-state';
 import { isDefined } from './helpers';
 import { ProjectDataParamsValues, ProjectGeometricSegmentationDataParamsValues, ProjectLatticeSegmentationDataParamsValues, ProjectMeshSegmentationDataParamsValues } from './transformers';
-import { StateObjectCell } from '../../../mol-state';
+import { State, StateObjectCell } from '../../../mol-state';
 import { PluginStateObject } from '../../../mol-plugin-state/objects';
 import { parseSegmentKey } from './volseg-api/utils';
 import { Asset } from '../../../mol-util/assets';
@@ -74,19 +74,37 @@ export class VolsegUI extends CollapsableControls<{}, { data: VolsegUIData }> {
     protected renderControls(): JSX.Element | null {
         return <VolsegControls plugin={this.plugin} data={this.state.data} setData={d => this.setState({ data: d })} />;
     }
+
+    private syncState(state: State): void {
+        const nodes = state.selectQ(q => q.ofType(VolsegEntry)).map(cell => cell?.obj).filter(isDefined);
+        const isHidden = nodes.length === 0;
+        const newData = VolsegUIData.changeAvailableNodes(this.state.data, nodes);
+        if (!this.state.data.globalState?.isRegistered()) {
+            const globalState = state.selectQ(q => q.ofType(VolsegGlobalState))[0]?.obj?.data;
+            if (globalState) newData.globalState = globalState;
+        }
+        if (!VolsegUIData.equals(this.state.data, newData) || this.state.isHidden !== isHidden) {
+            this.setState({ data: newData, isHidden: isHidden });
+        }
+        console.log('State synced');
+    }
+
     componentDidMount(): void {
         this.setState({ isHidden: true, isCollapsed: false });
+        this.syncState(this.plugin.state.data);
         this.subscribe(this.plugin.state.data.events.changed, e => {
-            const nodes = e.state.selectQ(q => q.ofType(VolsegEntry)).map(cell => cell?.obj).filter(isDefined);
-            const isHidden = nodes.length === 0;
-            const newData = VolsegUIData.changeAvailableNodes(this.state.data, nodes);
-            if (!this.state.data.globalState?.isRegistered()) {
-                const globalState = e.state.selectQ(q => q.ofType(VolsegGlobalState))[0]?.obj?.data;
-                if (globalState) newData.globalState = globalState;
-            }
-            if (!VolsegUIData.equals(this.state.data, newData) || this.state.isHidden !== isHidden) {
-                this.setState({ data: newData, isHidden: isHidden });
-            }
+            // this.plugin.behaviors.state.
+            this.syncState(e.state);
+            // const nodes = e.state.selectQ(q => q.ofType(VolsegEntry)).map(cell => cell?.obj).filter(isDefined);
+            // const isHidden = nodes.length === 0;
+            // const newData = VolsegUIData.changeAvailableNodes(this.state.data, nodes);
+            // if (!this.state.data.globalState?.isRegistered()) {
+            //     const globalState = e.state.selectQ(q => q.ofType(VolsegGlobalState))[0]?.obj?.data;
+            //     if (globalState) newData.globalState = globalState;
+            // }
+            // if (!VolsegUIData.equals(this.state.data, newData) || this.state.isHidden !== isHidden) {
+            //     this.setState({ data: newData, isHidden: isHidden });
+            // }
         });
     }
 }
