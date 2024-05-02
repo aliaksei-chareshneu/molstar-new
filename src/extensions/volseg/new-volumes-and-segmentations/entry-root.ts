@@ -1168,13 +1168,20 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             const segmentName = descriptionName;
             const annotLabels = descriptions[0].external_references?.map(e => `${applyEllipsis(e.label ? e.label : '')} [${e.resource}:${e.accession}]`);
             // TODO: try rendering multiple descriptions
-            if (!annotLabels && !segmentName || annotLabels?.length === 0 && !segmentName || descriptions[0].is_hidden === true) return;
+            // if (!annotLabels && !segmentName || annotLabels?.length === 0 && !segmentName || descriptions[0].is_hidden === true) return;
             // if (annotLabels.length > MAX_ANNOTATIONS_IN_LABEL + 1) {
             //     const nHidden = annotLabels.length - MAX_ANNOTATIONS_IN_LABEL;
             //     annotLabels.length = MAX_ANNOTATIONS_IN_LABEL;
             //     annotLabels.push(`(${nHidden} more annotations, click on the segment to see all)`);
             // }
-            return '<hr class="msp-highlight-info-hr"/>' + '<b>' + segmentName + '</b>' + '<hr class="msp-highlight-info-hr"/>' + annotLabels.filter(isDefined).join('<br/>');
+            if (descriptions[0].is_hidden === true) return;
+            let onHoverLabel = '';
+            // segment will have name
+            // it may not have labels
+            if (segmentName) onHoverLabel = onHoverLabel + '<hr class="msp-highlight-info-hr"/>' + '<b>' + segmentName + '</b>';
+            if (annotLabels && annotLabels.length > 0) onHoverLabel = onHoverLabel + '<hr class="msp-highlight-info-hr"/>' + annotLabels.filter(isDefined).join('<br/>')
+            // return '<hr class="msp-highlight-info-hr"/>' + '<b>' + segmentName + '</b>' + '<hr class="msp-highlight-info-hr"/>' + annotLabels.filter(isDefined).join('<br/>');
+            if (onHoverLabel !== '') return onHoverLabel; else return;
         }
     };
 

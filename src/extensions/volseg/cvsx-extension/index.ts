@@ -67,8 +67,8 @@ export async function loadCVSXFromAnything(plugin: PluginContext, data: StateObj
                     'lattice',
                     timeframeIndex
                 );
-                // const segmentLabels = getSegmentLabelsFromDescriptions(descriptionsForLattice);
-                const segmentLabels = [];
+                const segmentLabels = getSegmentLabelsFromDescriptions(descriptionsForLattice);
+                // const segmentLabels = [];
                 const segmentationParams: ProjectLatticeSegmentationDataParamsValues = {
                     timeframeIndex: timeframeIndex,
                     segmentationId: segmentationId,
