@@ -93,11 +93,11 @@ export class VolsegMeshSegmentationData {
             'mesh',
             timeframeIndex
         );
-        const descriptions = this.entryData.metadata.value!.getAllDescriptionsForSegmentationAndTimeframe(
-            segmentationId,
-            'mesh',
-            timeframeIndex
-        );
+        // const descriptions = this.entryData.metadata.value!.getAllDescriptionsForSegmentationAndTimeframe(
+        //     segmentationId,
+        //     'mesh',
+        //     timeframeIndex
+        // );
         // label - from descriptions
         for (const seg of segmentsToCreate) {
             const colorData = segmentAnnotations.find(a => a.segment_id === seg)?.color;
