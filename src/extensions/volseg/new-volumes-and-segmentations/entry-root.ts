@@ -1162,15 +1162,19 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             // theoretically there can be multiple descriptions
             // for each segment
             // first try assuming there is a single one
+            // TODO: add label name or something
+            // description?.name
+            const descriptionName = descriptions[0].name;
+            const segmentName = descriptionName;
             const annotLabels = descriptions[0].external_references?.map(e => `${applyEllipsis(e.label ? e.label : '')} [${e.resource}:${e.accession}]`);
             // TODO: try rendering multiple descriptions
-            if (!annotLabels || annotLabels.length === 0 || descriptions[0].is_hidden === true) return;
+            if (!annotLabels && !segmentName || annotLabels?.length === 0 && !segmentName || descriptions[0].is_hidden === true) return;
             // if (annotLabels.length > MAX_ANNOTATIONS_IN_LABEL + 1) {
             //     const nHidden = annotLabels.length - MAX_ANNOTATIONS_IN_LABEL;
             //     annotLabels.length = MAX_ANNOTATIONS_IN_LABEL;
             //     annotLabels.push(`(${nHidden} more annotations, click on the segment to see all)`);
             // }
-            return '<hr class="msp-highlight-info-hr"/>' + annotLabels.filter(isDefined).join('<br/>');
+            return '<hr class="msp-highlight-info-hr"/>' + '<b>' + segmentName + '</b>' + '<hr class="msp-highlight-info-hr"/>' + annotLabels.filter(isDefined).join('<br/>');
         }
     };
 

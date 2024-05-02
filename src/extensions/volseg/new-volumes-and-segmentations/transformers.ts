@@ -108,7 +108,8 @@ export const ProjectSegmentationData = CreateTransformer({
             const segmentationCif = CIF.schema.segmentation(block);
             const segmentLabels: { [id: number]: string } = {};
 
-            for (const segment of params.segmentLabels) segmentLabels[segment.id] = segment.label;
+            // for (const segment of params.segmentLabels) segmentLabels[segment.id] = segment.label;
+            for (const segment of params.segmentLabels) segmentLabels[segment.id] = '';
             // TODO: check here segment labels;
             // here params.segmentLabels has all 40 segment labels
             // should have only segment labels for that timeframe?
