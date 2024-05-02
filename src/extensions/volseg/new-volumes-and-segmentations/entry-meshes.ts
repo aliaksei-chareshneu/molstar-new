@@ -104,7 +104,7 @@ export class VolsegMeshSegmentationData {
             const color = colorData && colorData.length >= 3 ? Color.fromNormalizedArray(colorData, 0) : ColorNames.gray;
             // NOTE: for now single description
             // should be description for that segment
-            const targetDescription = descriptions.find(d => d.target_id && d.target_id.segment_id === seg && d.target_kind === 'mesh' && d.target_id.segmentation_id === segmentationId);
+            // const targetDescription = descriptions.find(d => d.target_id && d.target_id.segment_id === seg && d.target_kind === 'mesh' && d.target_id.segmentation_id === segmentationId);
             // const label = targetDescription?.name ? `<b>${targetDescription.name}</b>` : ||||||;
             const label = `${segmentationId} | Segment ${seg}`;
 
