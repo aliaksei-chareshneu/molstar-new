@@ -86,7 +86,6 @@ export class MetadataWrapper {
             // const removed = descriptions.filter(d => d.i)
             delete descriptions[id];
             this.raw.annotation.descriptions = descriptions;
-            console.log(this.raw.annotation.descriptions);
         }
     }
 
@@ -308,7 +307,6 @@ export class MetadataWrapper {
 
     get gridTotalVolume() {
         const currentVolumeDownsampling = this.currentVolumeDownsampling;
-        console.log('currentVolumeDownsampling', currentVolumeDownsampling);
         const [vx, vy, vz] = this.raw.grid.volumes.volume_sampling_info.boxes[currentVolumeDownsampling].voxel_size;
         const [gx, gy, gz] = this.raw.grid.volumes.volume_sampling_info.boxes[currentVolumeDownsampling].grid_dimensions;
         return vx * vy * vz * gx * gy * gz;

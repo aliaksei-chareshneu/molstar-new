@@ -87,7 +87,6 @@ export class VolsegUI extends CollapsableControls<{}, { data: VolsegUIData }> {
         if (!VolsegUIData.equals(this.state.data, newData) || this.state.isHidden !== isHidden) {
             this.setState({ data: newData, isHidden: isHidden });
         }
-        console.log('State synced');
     }
 
     componentDidMount(): void {
@@ -108,7 +107,6 @@ export class VolsegUI extends CollapsableControls<{}, { data: VolsegUIData }> {
 }
 
 async function parseJSONwithAnnotationsOrDescriptions(v: React.ChangeEvent<HTMLInputElement>, entryData: VolsegEntryData) {
-    console.log(v.target.files![0]);
     const file = Asset.File(v.target.files![0]);
     const asset = entryData.plugin.managers.asset.resolve(file, 'string');
     const data = (await asset.run()).data;
@@ -157,14 +155,10 @@ function VolsegEntryControls({ entryData }: { entryData: VolsegEntryData }) {
     // const selectedSegmentDescriptions = entryData.metadata.value!.getSegmentDescription(segmentId, segmentationId, kind);
     // NOTE: for now single description
     // const selectedSegmentDescription = selectedSegmentDescriptions ? selectedSegmentDescriptions[0] : undefined;
-    const visibleSegmentKeys = state.visibleSegments.map(seg => seg.segmentKey);
-    console.log(visibleSegmentKeys);
     const visibleModels = state.visibleModels.map(model => model.pdbId);
     const allPdbs = entryData.pdbs;
 
-    const currentTimeframe = useBehavior(entryData.currentTimeframe);
-    console.log('Current timframe is: ', currentTimeframe);
-    console.log('UI re-rendered');
+    useBehavior(entryData.currentTimeframe);
     const annotationsJson = metadata!.raw.annotation;
     return <>
         {/* Title */}
@@ -336,11 +330,9 @@ function VolumeControls({ entryData }: { entryData: VolsegEntryData }) {
     if (!h) return null;
     const isBusy = useBehavior(entryData.plugin.behaviors.state.isBusy);
     if (isBusy) {
-        console.log('isBusy!');
         return null;
     }
     return <>
-        {/* <Button onClick={() => { console.log('volume cache, segmentation cache: ', entryData.cachedVolumeTimeframesData, entryData.cachedSegmentationTimeframesData); }}>Get volume and segmentation cache</Button> */}
         <ExpandGroup header='Volume data'>
             {h.volumes.map((v) => {
                 const params: ProjectDataParamsValues = v.transform.params;
@@ -360,11 +352,9 @@ export function SegmentationControls({ model }: { model: VolsegEntryData }) {
     if (!h) return null;
     const isBusy = useBehavior(model.plugin.behaviors.state.isBusy);
     if (isBusy) {
-        console.log('isBusy!');
         return null;
     }
     return <>
-        {/* <Button onClick={() => { console.log('volume cache, segmentation cache: ', entryData.cachedVolumeTimeframesData, entryData.cachedSegmentationTimeframesData); }}>Get volume and segmentation cache</Button> */}
         <ExpandGroup header='Segmentation data'>
             {/* TODO: just lattices, need geometric and mesh segmentations as well */}
             {h.segmentations.map((v) => {

@@ -218,10 +218,8 @@ export class VolsegVolumeData {
             1: 'y',
             2: 'z'
         };
-        // console.log(dimensions);
         for (const i in dimensions) {
             if (dimensions[i] === 1) {
-                // console.log(`creating slice for dimension ${dimensionsOrder[i]}`);
                 const params = createVolumeRepresentationParams(this.entryData.plugin, volume, {
                     type: 'slice',
                     typeParams: { dimension: { name: dimensionsOrder[i], params: 0 }, isoValue: { kind: 'relative', relativeValue: 0 } },

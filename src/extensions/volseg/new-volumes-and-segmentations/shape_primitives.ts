@@ -52,8 +52,6 @@ function rgbaToHex(rgbaNormalized: Vector4) {
         a = '0' + a;
 
     const hexString = '#' + r + g + b + a;
-    // const hexNumber = parseInt(hexString.replace(/^#/, ''), 16);
-    // console.log(`Hex number ${hexNumber} for hex string ${hexString} and RGBA ${red}, ${green}, ${blue}, ${opacity}`);
     return hexString;
 }
 
@@ -153,7 +151,6 @@ export const CreateShapePrimitiveProviderCVSX = Transform({
 function _get_target_segment_name(allDescriptions: DescriptionData[], segment_id: number) {
     // NOTE: for now single description
     const description = allDescriptions.filter(d => d.target_id && d.target_id.segment_id === segment_id);
-    console.log(`Target segment name is ${description[0].name!}`);
     return description[0].name!;
 }
 

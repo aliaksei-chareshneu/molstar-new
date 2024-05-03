@@ -128,8 +128,6 @@ export class VolsegLatticeSegmentationData {
                 }
             }
         }
-        console.log('this.colorMap');
-        console.log(this.colorMap);
     }
 
     async updateOpacity(opacity: number, segmentationId: string) {

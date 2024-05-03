@@ -91,9 +91,6 @@ export function DescriptionsListItem({ model, d, currentTimeframe, selectedSegme
 
     // TODO: try to get updated version of this description by querying metadata
     const targetDescriptionCurrent = metadata!.raw.annotation!.descriptions[d.id];
-    console.log('targetDescriptionCurrent');
-    console.log(targetDescriptionCurrent);
-    // works, pass that down
     d = targetDescriptionCurrent;
     if (d.target_kind === 'entry' || !d.target_id || d.is_hidden === true) return;
 
@@ -134,7 +131,6 @@ export function DescriptionsList({ model, targetSegmentationId, targetKind }: { 
     // NOTE: for now single description
     const selectedSegmentDescription = selectedSegmentDescriptions ? selectedSegmentDescriptions[0] : undefined;
     const visibleSegmentKeys = state.visibleSegments.map(seg => seg.segmentKey);
-    console.log(visibleSegmentKeys);
     // const visibleModels = state.visibleModels.map(model => model.pdbId);
     // const allPdbs = model.pdbs;
 
@@ -165,8 +161,7 @@ export function SelectedSegmentDescription({ model, targetSegmentationId, target
     const selectedSegmentDescriptions = model.metadata.value!.getSegmentDescription(segmentId, segmentationId, kind);
     // NOTE: for now single description
     const selectedSegmentDescription = selectedSegmentDescriptions ? selectedSegmentDescriptions[0] : undefined;
-    const visibleSegmentKeys = state.visibleSegments.map(seg => seg.segmentKey);
-    console.log(visibleSegmentKeys);
+    // const visibleSegmentKeys = state.visibleSegments.map(seg => seg.segmentKey);
     return <>{
         anyDescriptions && <ExpandGroup header='Selected segment descriptions' initiallyExpanded>
             <div style={{ paddingTop: 4, paddingRight: 8, maxHeight: 300, overflow: 'hidden', overflowY: 'auto' }}>

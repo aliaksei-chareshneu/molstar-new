@@ -41,7 +41,7 @@ export async function parseCVSXJSON(rawFile: [string, Uint8Array], plugin: Plugi
 
 
 export async function actionToggleAllFilteredSegments(model: VolsegEntryData, segmentationId: string, kind: 'lattice' | 'mesh' | 'primitive', filteredDescriptions: DescriptionData[]) {
-    const currentTimeframe = model.currentTimeframe.value;
+    // const currentTimeframe = model.currentTimeframe.value;
     // This is currently visible
     const current = model.currentState.value.visibleSegments.map(seg => seg.segmentKey);
     // this is currently visible for this segmentation
@@ -63,22 +63,16 @@ export async function actionToggleAllFilteredSegments(model: VolsegEntryData, se
             return createSegmentKey(d.target_id!.segment_id, d.target_id!.segmentation_id, d.target_kind);
         }
     }).filter(Boolean);
-    const allSegmentKeysFromSegmentation = model.metadata.value!.getAllDescriptionsForSegmentationAndTimeframe(segmentationId, kind, currentTimeframe).map(d => {
-        if (d.target_kind !== 'entry') {
-            return createSegmentKey(d.target_id!.segment_id, d.target_id!.segmentation_id, d.target_kind);
-        }
-    }).filter(Boolean);
+    // const allSegmentKeysFromSegmentation = model.metadata.value!.getAllDescriptionsForSegmentationAndTimeframe(segmentationId, kind, currentTimeframe).map(d => {
+    //     if (d.target_kind !== 'entry') {
+    //         return createSegmentKey(d.target_id!.segment_id, d.target_id!.segmentation_id, d.target_kind);
+    //     }
+    // }).filter(Boolean);
     if (currentForThisSegmentation.length !== filteredDescriptions.length) {
 
-        console.log(filteredDescriptions);
         const allSegmentKeys = [...allFilteredSegmentKeys, ...currentForOtherSegmentations];
         await actionShowSegments(allSegmentKeys as string[], model);
     } else {
-        // TODO: add to currentForOtherSegmentations
-        // segments from this segmentation, but not filtered
-        const descriptionsFromThisSegmentationNotFiltered = allSegmentKeysFromSegmentation.filter(i => allFilteredSegmentKeys.indexOf(i) < 0);
-        console.log(descriptionsFromThisSegmentationNotFiltered);
-        debugger;
         await actionShowSegments(currentForOtherSegmentations, model);
     }
 }
@@ -132,7 +126,6 @@ export async function _actionShowSegments(parsedSegmentKeys: ParsedSegmentKey[],
             SegmentationIdsToSegmentIds.set(id, []);
         }
     }
-    console.log(SegmentationIdsToSegmentIds);
     const promises: Promise<void>[] = [];
     SegmentationIdsToSegmentIds.forEach((value, key) => {
         // TODO: refactor these three showSegments - they seem to not use any submodel parameters

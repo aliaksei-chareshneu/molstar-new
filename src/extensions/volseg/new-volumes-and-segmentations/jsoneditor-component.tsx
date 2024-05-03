@@ -11,7 +11,6 @@ interface JSONEditorComponentProps {
 }
 
 async function updateJSON(jsonData: AnnotationMetadata, entryData: VolsegEntryData) {
-    console.log('JSON changed'); console.log(jsonData);
     await entryData.api.updateAnnotationsJson(entryData.source, entryData.entryId, jsonData);
     await entryData.updateMetadata();
 }

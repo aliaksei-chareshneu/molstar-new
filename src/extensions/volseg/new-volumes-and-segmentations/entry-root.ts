@@ -163,21 +163,18 @@ class RawTimeframesDataCache {
                 bytes = bytes + b;
             }
         }
-        console.log('Entry size is: ', bytes, ' bytes');
         return bytes;
     }
 
     private _setCacheSizeInItems(entrySizeInBytes: number) {
         const limit = this.totalSizeLimitInBytes / entrySizeInBytes;
         this.maxEntries = Math.round(limit);
-        console.log(`maxEntries of ${this.kind} cache set to: ${this.maxEntries}`);
     };
 
     add(data: RawChannelData | RawSegmentationData) {
         if (this.cache.size >= this.maxEntries) {
             // least-recently used cache eviction strategy
             const keyToDelete = this.cache.keys().next().value;
-            console.log('key to delete', keyToDelete);
             this.cache.delete(keyToDelete);
         }
         // check if exists
@@ -206,7 +203,6 @@ class RawTimeframesDataCache {
         const hasKey = this.cache.has(key);
         if (hasKey) {
             // peek the entry, re-insert for LRU strategy
-            console.log('found in cache');
             const entry = this.cache.get(key)!;
             this.cache.delete(key);
             this.cache.set(key, entry);
@@ -215,10 +211,8 @@ class RawTimeframesDataCache {
             if (this.cache.size >= this.maxEntries) {
                 // least-recently used cache eviction strategy
                 const keyToDelete = this.cache.keys().next().value;
-                console.log('key to delete', keyToDelete);
                 this.cache.delete(keyToDelete);
             }
-            console.log('not in cache, loaded');
             let entry;
             if (kind === 'volume') {
                 entry = await this.entryData._loadRawChannelData(timeframeIndex, channelIdOrSegmentationId);
@@ -410,20 +404,16 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
     }
 
     sync() {
-        console.log('hierarchy synced');
         const volumes = this.findNodesByTags(VOLUME_NODE_TAG);
         const segmentations = this.findNodesByTags(SEGMENTATION_NODE_TAG);
         const geometricSegmentations = this.findNodesByTags(GEOMETRIC_SEGMENTATION_NODE_TAG);
         const meshSegmentations = this.findNodesByTags(MESH_SEGMENTATION_NODE_TAG);
-        console.log('volumes, segmentations');
-        console.log(volumes, segmentations);
         this.state.hierarchy.next({ volumes, segmentations, geometricSegmentations, meshSegmentations });
     }
 
     private async init() {
         this.sync();
         this.subscribeObservable(this.plugin.state.data.events.changed, state => {
-            console.log('data events changed emitted');
             this.sync();
         });
         const hasVolumes = this.metadata.value!.raw.grid.volumes.volume_sampling_info.spatial_downsampling_levels.length > 0;
@@ -449,7 +439,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
         this.kind = 'file';
         this.sync();
         this.subscribeObservable(this.plugin.state.data.events.changed, state => {
-            console.log('data events changed emitted');
             this.sync();
         });
         const hasVolumes = this.metadata.value!.raw.grid.volumes.volume_sampling_info.spatial_downsampling_levels.length > 0;
@@ -627,7 +616,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
         const url = this.api.geometricSegmentationUrl(this.source, this.entryId, segmentationId, timeframe);
         const primitivesData = await this._resolveStringUrl(url);
         const parsedData: ShapePrimitiveData = JSON.parse(primitivesData);
-        console.log('parsedData', parsedData);
         return new RawSegmentationData(
             timeframe,
             segmentationId,
@@ -723,8 +711,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
         const timeInfo = this.metadata.value!.raw.grid.volumes.time_info;
         const channelIds = this.metadata.value!.raw.grid.volumes.channel_ids;
         this.loadRawChannelsData(timeInfo, channelIds);
-        console.log('cachedVolumeTimeframesData');
-        console.log(this.cachedVolumeTimeframesData);
     }
 
     preloadSegmentationTimeframesDataFromFile() {
@@ -738,11 +724,7 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
                 this.cachedSegmentationTimeframesData.add(
                     rawLatticeSegmentationData
                 );
-                console.log('cachedSegmentationTimeframesData');
-                console.log(this.cachedSegmentationTimeframesData);
             }
-        } else {
-            console.log('No segmentation data for this entry');
         }
     }
 
@@ -760,10 +742,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
                     shapePrimitiveData
                 );
             }
-            console.log('cachedShapePrimitiveData');
-            console.log(this.cachedShapePrimitiveData);
-        } else {
-            console.log('No shape primitive data for this entry');
         }
     }
 
@@ -792,11 +770,7 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
                 this.cachedMeshesTimeframesData.add(
                     data
                 );
-                console.log('cachedMeshesTimeframesData');
-                console.log(this.cachedMeshesTimeframesData);
             }
-        } else {
-            console.log('No mesh segmentation data for this entry');
         }
     }
 
@@ -808,9 +782,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
                 rawChannelData
             );
         }
-        console.log('cachedVolumeTimeframesData');
-        console.log(this.cachedVolumeTimeframesData);
-
     }
 
     async preloadSegmentationTimeframesData() {
@@ -818,10 +789,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             const segmentationIds = this.metadata.value!.raw.grid.segmentation_lattices.segmentation_ids;
             const timeInfoMapping = this.metadata.value!.raw.grid.segmentation_lattices.time_info;
             this.loadRawLatticeSegmentationData(timeInfoMapping, segmentationIds);
-            console.log('cachedSegmentationTimeframesData');
-            console.log(this.cachedSegmentationTimeframesData);
-        } else {
-            console.log('No segmentation data for this entry');
         }
     }
 
@@ -830,10 +797,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             const segmentationIds = this.metadata.value!.raw.grid.segmentation_meshes.segmentation_ids;
             const timeInfoMapping = this.metadata.value!.raw.grid.segmentation_meshes.time_info;
             this.loadRawMeshSegmentationData(timeInfoMapping, segmentationIds);
-            console.log('cachedMeshesTimeframesData');
-            console.log(this.cachedMeshesTimeframesData);
-        } else {
-            console.log('No mesh segmentation data for this entry');
         }
     }
 
@@ -842,10 +805,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             const segmentationIds = this.metadata.value!.raw.grid.geometric_segmentation.segmentation_ids;
             const timeInfoMapping = this.metadata.value!.raw.grid.geometric_segmentation.time_info;
             this.loadRawShapePrimitiveData(timeInfoMapping, segmentationIds);
-            console.log('cachedShapePrimitiveData');
-            console.log(this.cachedShapePrimitiveData);
-        } else {
-            console.log('No shape primitive data for this entry');
         }
     }
 
@@ -925,7 +884,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
 
     changeCurrentTimeframe(index: number) {
         this.currentTimeframe.next(index);
-        console.log('Timeframe changed');
     }
 
     addCurrentVolume(t: StateTransform<VolRepr3DT>) {
@@ -942,7 +900,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
         }
         if (!added) next.push(t);
         this.currentVolume.next(next);
-        // console.log('volume added, currentVolume: ', this.currentVolume.value);
     }
 
     removeCurrentVolume(ref: string) {
@@ -954,7 +911,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             }
         }
         this.currentVolume.next(next);
-        console.log('volume removed, currentVolume: ', this.currentVolume.value);
     }
 
     actionHighlightSegment(segmentKey?: string) {
@@ -1025,65 +981,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
         channelToBeUpdated.volumeOpacity = params.opacity;
         await this.updateStateNode({ channelsData: [...currentChannelsData] });
     }
-
-    // function to use in actionShowSegments for both lattice and mesh segments
-    // async _actionShowSegments(parsedSegmentKeys: ParsedSegmentKey[], existingSegmentationIds: string[], kind: 'mesh' | 'lattice' | 'primitive') {
-    //     const segmentKeys = parsedSegmentKeys.filter(k => k.kind === kind);
-    //     const segmentIds = segmentKeys.map(k => k.segmentId);
-    //     const SegmentationIdsToSegmentIds = new Map<string, number[]>;
-    //     for (const key of segmentKeys) {
-    //         if (!SegmentationIdsToSegmentIds.has(key.segmentationId)) {
-    //             SegmentationIdsToSegmentIds.set(key.segmentationId, [key.segmentId]);
-    //         } else {
-    //             // have this key, add segmentId
-    //             const currentSegmentationIds = SegmentationIdsToSegmentIds.get(key.segmentationId);
-    //             SegmentationIdsToSegmentIds.set(key.segmentationId, [...currentSegmentationIds!, key.segmentId]);
-    //         }
-    //     }
-    //     for (const id of existingSegmentationIds) {
-    //         if (!SegmentationIdsToSegmentIds.has(id)) {
-    //             SegmentationIdsToSegmentIds.set(id, []);
-    //         }
-    //     }
-    //     console.log(SegmentationIdsToSegmentIds);
-    //     const promises: Promise<void>[] = [];
-    //     SegmentationIdsToSegmentIds.forEach((value, key) => {
-    //         if (kind === 'lattice') promises.push(this.latticeSegmentationData.showSegments(value, key));
-    //         else if (kind === 'mesh') promises.push(this.meshSegmentationData.showSegments(value, key));
-    //         else if (kind === 'primitive') promises.push(this.geometricSegmentationData.showSegments(value, key));
-    //     });
-    //     await Promise.all(promises);
-    // }
-
-    // async actionShowSegments(segmentKeys: string[]) {
-    //     const allExistingLatticeSegmentationIds = this.metadata.value!.raw.grid.segmentation_lattices!.segmentation_ids;
-    //     const allExistingMeshSegmentationIds = this.metadata.value!.raw.grid.segmentation_meshes!.segmentation_ids;
-    //     const allExistingGeometricSegmentationIds = this.metadata.value!.raw.grid.geometric_segmentation!.segmentation_ids;
-    //     if (segmentKeys.length === 0) {
-    //         for (const id of allExistingLatticeSegmentationIds) {
-    //             await this.latticeSegmentationData.showSegments([], id);
-    //         }
-    //         for (const id of allExistingMeshSegmentationIds) {
-    //             await this.meshSegmentationData.showSegments([], id);
-    //         }
-    //         for (const id of allExistingGeometricSegmentationIds) {
-    //             await this.geometricSegmentationData.showSegments([], id);
-    //         }
-    //     }
-    //     const parsedSegmentKeys = segmentKeys.map(
-    //         k => parseSegmentKey(k)
-    //     );
-    //     // LATTICES PART
-    //     this._actionShowSegments(parsedSegmentKeys, allExistingLatticeSegmentationIds, 'lattice');
-    //     // MESHES PART
-    //     this._actionShowSegments(parsedSegmentKeys, allExistingMeshSegmentationIds, 'mesh');
-    //     // GEOMETRIC SEGMENTATION PAR
-    //     this._actionShowSegments(parsedSegmentKeys, allExistingGeometricSegmentationIds, 'primitive');
-
-    //     await this.updateStateNode({ visibleSegments: segmentKeys.map(s => ({ segmentKey: s })) });
-    //     console.log('Current state');
-    //     console.log(this.getStateNode());
-    // }
 
     private async highlightSegment(segmentKey?: string) {
         await PluginCommands.Interactivity.ClearHighlights(this.plugin);
@@ -1215,9 +1112,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
                 // const shapePrimitiveParamsValues = (loci.shape.sourceData ?? {}) as CreateShapePrimitiveProviderParamsValues;
                 return 'primitive';
             }
-        } else {
-            // TODO: fix in case of isosurface loci
-            console.log(`Segmentation kind is not supported for ${loci}`);
         }
     }
 

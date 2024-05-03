@@ -114,7 +114,6 @@ export const ProjectSegmentationData = CreateTransformer({
             // here params.segmentLabels has all 40 segment labels
             // should have only segment labels for that timeframe?
             const volume = await volumeFromSegmentationData(segmentationCif, { label: label, segmentLabels: segmentLabels, ownerId: params.ownerId }).runInContext(ctx);
-            console.log(volume);
             const [x, y, z] = volume.grid.cells.space.dimensions;
             const props = { label: `ID: ${label}`, description: `Segmentation ID: ${label} ${x}\u00D7${y}\u00D7${z}` };
             return new PluginStateObject.Volume.Data(volume, props);
