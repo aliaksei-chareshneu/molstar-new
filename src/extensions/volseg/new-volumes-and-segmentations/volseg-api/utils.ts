@@ -161,7 +161,7 @@ export class MetadataWrapper {
         if (!this.channelAnnotations) {
             return Color(0x121212);
         }
-        const channelColorArray = this.channelAnnotations.filter(i => i.channel_id === channel_id)[0]?.color;
+        const channelColorArray = this.channelAnnotations.filter(i => i.label === channel_id)[0]?.color;
         if (channelColorArray) {
             const color = Color.fromNormalizedArray(channelColorArray, 0);
             return color;
