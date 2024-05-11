@@ -50,7 +50,9 @@ export async function loadCVSXFromAnything(plugin: PluginContext, data: StateObj
         const hasLattices = entryData.filesData?.latticeSegmentations;
         if (hasLattices) {
             // let segmentationIds = hasLattices.segmentation_ids;
-            const segmentationIds = hasLattices.map(l => l.segmentationId);
+            // filter only lattices for timeframeIndex
+            const latticesForTimeframeIndex = hasLattices.filter(l => l.timeframeIndex === timeframeIndex);
+            const segmentationIds = latticesForTimeframeIndex.map(l => l.segmentationId);
             // if (entryData.filesData!.query.segmentation_id) {
             //     segmentationIds = [entryData.filesData!.query.segmentation_id];
             // }
