@@ -4,7 +4,7 @@ import { ParamDefinition as PD } from '../../../mol-util/param-definition';
 import { Mesh } from '../../../mol-geo/geometry/mesh/mesh';
 import { MeshBuilder } from '../../../mol-geo/geometry/mesh/mesh-builder';
 import { addSphere } from '../../../mol-geo/geometry/mesh/builder/sphere';
-import { Mat4, Vec3 } from '../../../mol-math/linear-algebra';
+import { Mat4, Vec3, Vec4 } from '../../../mol-math/linear-algebra';
 import { Shape } from '../../../mol-model/shape';
 import { Color } from '../../../mol-util/color';
 import { StateTransformer } from '../../../mol-state';
@@ -15,6 +15,7 @@ import { Primitive } from '../../../mol-geo/primitive/primitive';
 import { polygon } from '../../../mol-geo/primitive/polygon';
 import { addEllipsoid } from '../../../mol-geo/geometry/mesh/builder/ellipsoid';
 import { DescriptionData, SegmentAnnotationData, Cylinder, ShapePrimitiveData, Ellipsoid, PyramidPrimitive, Sphere, BoxPrimitive, Vector4 } from './volseg-api/data';
+import { ColorNames } from '../../../mol-util/color/names';
 
 
 
@@ -32,30 +33,6 @@ export function Cone() {
     if (!cone) cone = Pyramid(polygon(48, true));
     return cone;
 }
-
-function rgbaToHex(rgbaNormalized: Vector4) {
-    const rgba = rgbaNormalized.map(i => Math.round(i * 255));
-    const [red, green, blue, opacity] = rgba;
-
-    let r = Math.round(red).toString(16);
-    let g = Math.round(green).toString(16);
-    let b = Math.round(blue).toString(16);
-    let a = Math.round(opacity).toString(16);
-
-    if (r.length === 1)
-        r = '0' + r;
-    if (g.length === 1)
-        g = '0' + g;
-    if (b.length === 1)
-        b = '0' + b;
-    if (a.length === 1)
-        a = '0' + a;
-
-    const hexString = '#' + r + g + b + a;
-    return hexString;
-}
-
-
 
 // export type ShapePrimitive =
 //     | { kind: 'sphere', center: number[], radius: number, label: string, color: number }
@@ -154,12 +131,11 @@ function _get_target_segment_name(allDescriptions: DescriptionData[], segment_id
     return description[0].name!;
 }
 
-function _get_target_segment_color_as_hex(allSegmentAnnotations: SegmentAnnotationData[], segment_id: number) {
+function _get_target_segment_color(allSegmentAnnotations: SegmentAnnotationData[], segment_id: number) {
     // NOTE: for now single annotation, should be single one
-    const annotation = allSegmentAnnotations.filter(a => a.segment_id === segment_id);
-    const colorAsArray = annotation[0].color!;
-    const colorAsHex = rgbaToHex(colorAsArray);
-    return colorAsHex;
+    const annotation = allSegmentAnnotations.find(a => a.segment_id === segment_id);
+    const color = annotation?.color ?? [0.9, 0.9, 0.9, 1.0];
+    return color;
 }
 
 function createShapePrimitive(data: ShapePrimitiveData, params: CreateShapePrimitiveProviderParamsValues) {
@@ -209,14 +185,12 @@ function createShapePrimitive(data: ShapePrimitiveData, params: CreateShapePrimi
             break;
     }
     // }
-
-
     return Shape.create(
         'Shape Primitives',
         params,
         MeshBuilder.getMesh(builder),
-        // g => Color(data[g].color),
-        g => Color.fromHexStyle(_get_target_segment_color_as_hex(segmentAnnotations, p!.id)),
+        g => Color.fromNormalizedArray(_get_target_segment_color(segmentAnnotations, p!.id), 0),
+        // g => Color.fromHexStyle(_get_target_segment_color_as_hex(segmentAnnotations, p!.id)),
         () => 1,
         // g => data[g].label,
         g => _get_target_segment_name(descriptions, p!.id)
