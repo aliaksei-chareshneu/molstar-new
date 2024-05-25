@@ -4,7 +4,7 @@ import { ParamDefinition as PD } from '../../../mol-util/param-definition';
 import { Mesh } from '../../../mol-geo/geometry/mesh/mesh';
 import { MeshBuilder } from '../../../mol-geo/geometry/mesh/mesh-builder';
 import { addSphere } from '../../../mol-geo/geometry/mesh/builder/sphere';
-import { Mat4, Vec3, Vec4 } from '../../../mol-math/linear-algebra';
+import { Mat4, Vec3 } from '../../../mol-math/linear-algebra';
 import { Shape } from '../../../mol-model/shape';
 import { Color } from '../../../mol-util/color';
 import { StateTransformer } from '../../../mol-state';
@@ -14,8 +14,7 @@ import { Pyramid, TriangularPyramid } from '../../../mol-geo/primitive/pyramid';
 import { Primitive } from '../../../mol-geo/primitive/primitive';
 import { polygon } from '../../../mol-geo/primitive/polygon';
 import { addEllipsoid } from '../../../mol-geo/geometry/mesh/builder/ellipsoid';
-import { DescriptionData, SegmentAnnotationData, Cylinder, ShapePrimitiveData, Ellipsoid, PyramidPrimitive, Sphere, BoxPrimitive, Vector4 } from './volseg-api/data';
-import { ColorNames } from '../../../mol-util/color/names';
+import { DescriptionData, SegmentAnnotationData, Cylinder, ShapePrimitiveData, Ellipsoid, PyramidPrimitive, Sphere, BoxPrimitive } from './volseg-api/data';
 
 
 
