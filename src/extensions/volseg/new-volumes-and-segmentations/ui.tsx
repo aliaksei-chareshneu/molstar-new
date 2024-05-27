@@ -208,7 +208,7 @@ function VolsegEntryControls({ entryData }: { entryData: VolsegEntryData }) {
         {/* Descriptions */}
         <SelectedSegmentDescription model={entryData} targetSegmentationId={segmentationId} targetKind={kind}></SelectedSegmentDescription>
 
-        {<ExpandGroup header='Edit descriptions' initiallyExpanded>
+        {/* {<ExpandGroup header='Edit descriptions' initiallyExpanded>
             <div className='msp-btn msp-btn-block msp-btn-action msp-loader-msp-btn-file' style={{ marginTop: '1px' }}>
                 {'Load JSON with descriptions'} <input onChange={async v => {
                     const data = await parseJSONwithAnnotationsOrDescriptions(v, entryData);
@@ -223,7 +223,7 @@ function VolsegEntryControls({ entryData }: { entryData: VolsegEntryData }) {
                     await entryData.editSegmentAnnotations(data as SegmentAnnotationData[]);
                 }} type='file' multiple={false} />
             </div>
-        </ExpandGroup>}
+        </ExpandGroup>} */}
     </>;
 }
 
