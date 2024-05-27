@@ -70,7 +70,7 @@ export const NewVolseg = PluginBehavior.create<{ autoAttach: boolean, showToolti
 
 
 export const LoadVolseg = StateAction.build({
-    display: { name: 'Load New Volume & Segmentation' },
+    display: { name: 'Load Volume & Segmentation' },
     from: SO.Root,
     params: (a, plugin: PluginContext) => {
         const res = createLoadVolsegParams(plugin, (plugin.customState as any).volsegAvailableEntries);
