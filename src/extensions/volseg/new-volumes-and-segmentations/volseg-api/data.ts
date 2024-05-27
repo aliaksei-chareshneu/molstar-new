@@ -208,7 +208,7 @@ export interface AnnotationMetadata {
     // id => DescriptionData
     descriptions: { [id: string]: DescriptionData }
     // NOTE: on frontend, segment key = `${kind}:{segmentation_id}:{segment_id}`
-    annotations: SegmentAnnotationData[]
+    segment_annotations: SegmentAnnotationData[]
     details?: string
     volume_channels_annotations?: ChannelAnnotation[]
 }
@@ -228,7 +228,7 @@ export interface DescriptionData {
     is_hidden?: boolean
     time?: number | number[] | Vector2[]
 
-    description?: DescriptionText
+    details?: DetailsText
     metadata?: { [key: string]: any}
 }
 
@@ -237,7 +237,7 @@ export interface TargetId {
     segment_id: number
 }
 
-export interface DescriptionText {
+export interface DetailsText {
     format: 'text' | 'markdown'
     text: string
 }

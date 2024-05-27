@@ -92,7 +92,7 @@ export class MetadataWrapper {
     removeSegmentAnnotation(id: string) {
         const segmentAnnotations = this.allAnnotations;
         const filtered = segmentAnnotations.filter(a => a.id !== id);
-        this.raw.annotation!.annotations = filtered;
+        this.raw.annotation!.segment_annotations = filtered;
     }
 
     get allDescriptions() {
@@ -127,7 +127,7 @@ export class MetadataWrapper {
     }
 
     get allAnnotations() {
-        const annotations = this.raw.annotation?.annotations;
+        const annotations = this.raw.annotation?.segment_annotations;
         if (annotations) return annotations; else return [];
     }
     getAllAnnotationsForTimeframe(timeframeIndex: number) {

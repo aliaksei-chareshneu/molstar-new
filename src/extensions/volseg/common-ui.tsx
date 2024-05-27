@@ -9,9 +9,9 @@ import { VolsegEntryData } from './new-volumes-and-segmentations/entry-root';
 import Markdown from 'react-markdown';
 import { capitalize } from '../../mol-util/string';
 import { useState } from 'react';
-import { DescriptionData, DescriptionText, ExternalReference } from './new-volumes-and-segmentations/volseg-api/data';
+import { DescriptionData, DetailsText, ExternalReference } from './new-volumes-and-segmentations/volseg-api/data';
 
-export function DescriptionTextUI({ descriptionText: d }: { descriptionText: DescriptionText }) {
+export function DescriptionTextUI({ descriptionText: d }: { descriptionText: DetailsText }) {
     if (d.format === 'markdown') {
         return <>
             <br />
@@ -50,7 +50,7 @@ export function EntryDescriptionUI({ entryDescriptionData: e }: { entryDescripti
     return <ExpandGroup header='Entry description data'>
         <div key={e.id}>
             {e.name ?? ''}
-            {e.description && <DescriptionTextUI descriptionText={e.description}></DescriptionTextUI>}
+            {e.details && <DescriptionTextUI descriptionText={e.details}></DescriptionTextUI>}
             {e.external_references && <ExternalReferencesUI externalReferences={e.external_references} />}
         </div>
     </ExpandGroup>;
@@ -184,8 +184,8 @@ export function SelectedSegmentDescription({ model, targetSegmentationId, target
                         <b>Description: </b>
                         <p>{selectedSegmentDescription.description.text}</p>
                     </>} */}
-                {selectedSegmentDescription && selectedSegmentDescription.description &&
-                    <DescriptionTextUI descriptionText={selectedSegmentDescription.description}></DescriptionTextUI>}
+                {selectedSegmentDescription && selectedSegmentDescription.details &&
+                    <DescriptionTextUI descriptionText={selectedSegmentDescription.details}></DescriptionTextUI>}
                 {/* {selectedSegmentDescription?.external_references?.map(ref => {
                     return <p key={ref.id} style={{ marginTop: 4 }}>
                         {ref.url ? <a href={ref.url}>{ref.resource}:{ref.accession}</a> :
