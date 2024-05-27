@@ -42,7 +42,7 @@ export const JSONEditorComponent: React.FC<JSONEditorComponentProps> = ({ jsonDa
     return (
         <div style={{ flex: '1', flexDirection: 'column' }}>
             <div ref={containerRef} style={{ width: '100%', height: '400px' }} />
-            <Button onClick={async () => await updateJSON(jsonDataUpdated.current, entryData)}>Update JSON</Button>
+            <Button onClick={async () => await updateJSON(jsonDataUpdated.current, entryData)}>Update annotations.json</Button>
         </div>
     );
 };
