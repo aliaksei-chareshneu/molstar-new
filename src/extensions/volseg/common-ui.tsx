@@ -60,7 +60,7 @@ export const MetadataTextFilter = ({ setFilteredDescriptions, descriptions, mode
     const [text, setText] = useState('');
 
     function filterDescriptions(keyword: string) {
-        return model.metadata!.value!.filterDescriptionsBasedOnKeywordInMetadata(descriptions, keyword);
+        return model.metadata!.value!.filterDescriptions(descriptions, keyword);
     }
 
     return (

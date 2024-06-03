@@ -267,12 +267,25 @@ export class MetadataWrapper {
         return filtered;
     }
 
-    filterDescriptionsBasedOnKeywordInMetadata(d: DescriptionData[], keyword: string) {
+    filterDescriptions(d: DescriptionData[], keyword: string) {
         // for each description
         // loop over metadata fields
         // compare value of each field with keyword
         if (keyword === '') return d;
-        const filtered = d.filter(i => i.metadata && Object.values(i.metadata).includes(keyword));
+        const kw = keyword.toLowerCase();
+        const filtered = d.filter(i => {
+            if (i.name) {
+                if (i.name.toLowerCase().includes(kw)) {
+                    return true;
+                }
+            }
+            if (i.metadata) {
+                const values = Object.values(i.metadata) as string[];
+                const valuesLowerCase = values.map(v => v.toLowerCase());
+                if (valuesLowerCase.includes(kw)) return true;
+            }
+        }
+        );
         // suppose no segments
         return filtered;
     }
