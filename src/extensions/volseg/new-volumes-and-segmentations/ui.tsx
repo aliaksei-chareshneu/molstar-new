@@ -106,14 +106,6 @@ export class VolsegUI extends CollapsableControls<{}, { data: VolsegUIData }> {
     }
 }
 
-async function parseJSONwithAnnotationsOrDescriptions(v: React.ChangeEvent<HTMLInputElement>, entryData: VolsegEntryData) {
-    const file = Asset.File(v.target.files![0]);
-    const asset = entryData.plugin.managers.asset.resolve(file, 'string');
-    const data = (await asset.run()).data;
-    const parsedData: DescriptionData[] | SegmentAnnotationData[] = JSON.parse(data);
-    return parsedData;
-}
-
 function VolsegControls({ plugin, data, setData }: { plugin: PluginContext, data: VolsegUIData, setData: (d: VolsegUIData) => void }) {
     const entryData = data.activeNode?.data;
     if (!entryData) {
@@ -207,23 +199,6 @@ function VolsegEntryControls({ entryData }: { entryData: VolsegEntryData }) {
 
         {/* Descriptions */}
         <SelectedSegmentDescription model={entryData} targetSegmentationId={segmentationId} targetKind={kind}></SelectedSegmentDescription>
-
-        {/* {<ExpandGroup header='Edit descriptions' initiallyExpanded>
-            <div className='msp-btn msp-btn-block msp-btn-action msp-loader-msp-btn-file' style={{ marginTop: '1px' }}>
-                {'Load JSON with descriptions'} <input onChange={async v => {
-                    const data = await parseJSONwithAnnotationsOrDescriptions(v, entryData);
-                    await entryData.editDescriptions(data as DescriptionData[]);
-                }} type='file' multiple={false} />
-            </div>
-        </ExpandGroup>}
-        {<ExpandGroup header='Edit segment annotations' initiallyExpanded>
-            <div className='msp-btn msp-btn-block msp-btn-action msp-loader-msp-btn-file' style={{ marginTop: '1px' }}>
-                {'Load JSON with segment annotations'} <input onChange={async v => {
-                    const data = await parseJSONwithAnnotationsOrDescriptions(v, entryData);
-                    await entryData.editSegmentAnnotations(data as SegmentAnnotationData[]);
-                }} type='file' multiple={false} />
-            </div>
-        </ExpandGroup>} */}
     </>;
 }
 
