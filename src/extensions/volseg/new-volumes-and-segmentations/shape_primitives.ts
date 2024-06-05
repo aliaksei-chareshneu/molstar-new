@@ -82,25 +82,6 @@ export const CreateShapePrimitiveProvider = Transform({
     }
 });
 
-export const CreateShapePrimitiveProviderCVSX = Transform({
-    name: 'create-shape-primitive-provider-cvsx',
-    display: { name: 'Shape Primitives' },
-    from: PluginStateObject.Data.String,
-    to: PluginStateObject.Shape.Provider,
-    params: CreateShapePrimitiveProviderParams
-})({
-    apply({ a, params }) {
-        const shapePrimitiveData: ShapePrimitiveData = JSON.parse(a.data);
-        return new PluginStateObject.Shape.Provider({
-            label: 'Shape Primitives',
-            data: params,
-            params: Mesh.Params,
-            geometryUtils: Mesh.Utils,
-            getShape: (_, data) => createShapePrimitive(shapePrimitiveData, params)
-        }, { label: 'Shape Primitives' });
-    }
-});
-
 
 function _get_target_segment_name(allDescriptions: DescriptionData[], segment_id: number) {
     // NOTE: for now single description
