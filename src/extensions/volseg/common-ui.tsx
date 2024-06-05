@@ -128,13 +128,13 @@ export function DescriptionsList({ model, targetSegmentationId, targetKind }: { 
 
     return <>
         <MetadataTextFilter setFilteredDescriptions={setFilteredDescriptions} descriptions={allDescriptionsForSegmentationId} model={model}></MetadataTextFilter>
-        {filteredDescriptions.length > 0 && <>
+        {filteredDescriptions.length > 0 && <div key={targetSegmentationId}>
             <WaitingButton onClick={async () => { await sleep(20); await actionToggleAllFilteredSegments(model, targetSegmentationId, targetKind, filteredDescriptions); }} style={{ marginTop: 1 }}>
                 Toggle All segments
             </WaitingButton>
             <div style={{ maxHeight: 200, overflow: 'hidden', overflowY: 'auto', marginBlock: 1 }}>
                 {filteredDescriptions.map(d => {
-                    return <DescriptionsListItem model={model} d={d} currentTimeframe={currentTimeframe} selectedSegmentDescription={selectedSegmentDescription} visibleSegmentKeys={visibleSegmentKeys} />;
+                    return <DescriptionsListItem key={d.id} model={model} d={d} currentTimeframe={currentTimeframe} selectedSegmentDescription={selectedSegmentDescription} visibleSegmentKeys={visibleSegmentKeys} />;
                 }
                 )}
             </div>
