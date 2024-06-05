@@ -154,7 +154,7 @@ function VolsegEntryControls({ entryData }: { entryData: VolsegEntryData }) {
         </div>
         {entryDescriptions.length > 0 && entryDescriptions.map(e =>
             <EntryDescriptionUI key={e.id} entryDescriptionData={e}></EntryDescriptionUI>)}
-        <Popup nested trigger={<Button>Annotation Editor</Button>} modal>
+        <Popup nested trigger={<button className="msp-btn msp-btn-block">Annotation Editor</button>} modal>
             <>
                 <JSONEditorComponent jsonData={annotationsJson} entryData={entryData} />
             </>
