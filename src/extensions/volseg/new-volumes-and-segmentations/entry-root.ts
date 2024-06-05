@@ -355,7 +355,7 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
 
         const rawLatticeSegmentations = this.getRawLatticeSegmentationsFromCSVX(cvsxFilesIndex, zf);
         const rawMeshSegmentations = this.getRawMeshSegmentationsFromCSVX(cvsxFilesIndex, zf);
-        const rawGeometricSegmentations = this.getRawLatticeSegmentationsFromCSVX(cvsxFilesIndex, zf);
+        const rawGeometricSegmentations = this.getRawGeometricSegmentationsFromCVSX(cvsxFilesIndex, zf);
 
         if (!rawQueryJSON || !metadataJSONEntry || !annotationJSONEntry) {
             throw new Error('CVSX has wrong content, some obligatory components are missing');
