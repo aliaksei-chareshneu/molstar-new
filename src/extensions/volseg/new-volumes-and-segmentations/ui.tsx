@@ -28,8 +28,6 @@ import { ProjectDataParamsValues, ProjectGeometricSegmentationDataParamsValues, 
 import { State, StateObjectCell } from '../../../mol-state';
 import { PluginStateObject } from '../../../mol-plugin-state/objects';
 import { parseSegmentKey } from './volseg-api/utils';
-import { Asset } from '../../../mol-util/assets';
-import { DescriptionData, SegmentAnnotationData } from './volseg-api/data';
 import React from 'react';
 import { VolsegGeometricSegmentation } from './shape_primitives';
 import { VolsegMeshSegmentation } from '../new-meshes/mesh-extension';
