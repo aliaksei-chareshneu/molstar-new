@@ -33,7 +33,6 @@ export function DescriptionTextUI({ descriptionText: d }: { descriptionText: Det
 export function ExternalReferencesUI({ externalReferences: e }: { externalReferences: ExternalReference[] }) {
     return <>
         {e.map(ref => {
-            // if (description.target_kind === 'entry' || !description.target_id) return;
             return <p key={ref.id} style={{ marginTop: 4 }}>
                 {ref.url ? <a href={ref.url}>{ref.resource}:{ref.accession}</a> :
                     <small>{ref.resource}:{ref.accession}</small>}
@@ -64,12 +63,10 @@ export const MetadataTextFilter = ({ setFilteredDescriptions, descriptions, mode
     }
 
     return (
-        // <View style={{ padding: 10 }}>
         <TextInput
             style={{ order: 1, flex: '1 1 auto', minWidth: 0, marginBlock: 1 }} className='msp-form-control'
             value={text}
             placeholder="Type keyword to filter segments..."
-            // this will just set text, need to filter metadata based on text
             onChange={newText => {
                 setText(newText);
                 const filteredDescriptions = filterDescriptions(newText);
@@ -89,7 +86,6 @@ export function DescriptionsListItem({ model, d, currentTimeframe, selectedSegme
     if (d.time && Array.isArray(d.time) && d.time.every(i => Number.isFinite(i)) && !(d.time as number[]).includes(currentTimeframe)) return;
     const segmentKey = createSegmentKey(d.target_id.segment_id, d.target_id.segmentation_id, d.target_kind);
 
-    // TODO: try to get updated version of this description by querying metadata
     const targetDescriptionCurrent = metadata!.raw.annotation!.descriptions[d.id];
     d = targetDescriptionCurrent;
     if (d.target_kind === 'entry' || !d.target_id || d.is_hidden === true) return;
@@ -117,8 +113,6 @@ export function DescriptionsList({ model, targetSegmentationId, targetKind }: { 
     const state = useBehavior(model.currentState);
     const currentTimeframe = useBehavior(model.currentTimeframe);
     const metadata = useBehavior(model.metadata);
-    // const allDescriptions = metadata!.allDescriptions;
-    // is there a method in metadata that gets all descriptions for target segmentation id and kind?
     const allDescriptionsForSegmentationId = metadata!.getDescriptions(
         targetSegmentationId,
         targetKind,
@@ -131,8 +125,6 @@ export function DescriptionsList({ model, targetSegmentationId, targetKind }: { 
     // NOTE: for now single description
     const selectedSegmentDescription = selectedSegmentDescriptions ? selectedSegmentDescriptions[0] : undefined;
     const visibleSegmentKeys = state.visibleSegments.map(seg => seg.segmentKey);
-    // const visibleModels = state.visibleModels.map(model => model.pdbId);
-    // const allPdbs = model.pdbs;
 
     return <>
         <MetadataTextFilter setFilteredDescriptions={setFilteredDescriptions} descriptions={allDescriptionsForSegmentationId} model={model}></MetadataTextFilter>
@@ -153,15 +145,12 @@ export function SelectedSegmentDescription({ model, targetSegmentationId, target
     const state = useBehavior(model.currentState);
     useBehavior(model.currentTimeframe);
     const metadata = useBehavior(model.metadata);
-    // const allDescriptions = metadata!.allDescriptions;
-    // is there a method in metadata that gets all descriptions for target segmentation id and kind?
     const anyDescriptions = metadata!.allDescriptions.length > 0;
     const parsedSelectedSegmentKey = parseSegmentKey(state.selectedSegment);
     const { segmentId, segmentationId, kind } = parsedSelectedSegmentKey;
     const selectedSegmentDescriptions = model.metadata.value!.getSegmentDescription(segmentId, segmentationId, kind);
     // NOTE: for now single description
     const selectedSegmentDescription = selectedSegmentDescriptions ? selectedSegmentDescriptions[0] : undefined;
-    // const visibleSegmentKeys = state.visibleSegments.map(seg => seg.segmentKey);
     return <>{
         anyDescriptions && <ExpandGroup header='Selected segment descriptions' initiallyExpanded>
             <div style={{ paddingTop: 4, paddingRight: 8, maxHeight: 300, overflow: 'hidden', overflowY: 'auto' }}>
@@ -170,32 +159,8 @@ export function SelectedSegmentDescription({ model, targetSegmentationId, target
                     selectedSegmentDescription.target_kind !== 'entry' &&
                     selectedSegmentDescription.target_id &&
                     <b>Segment {selectedSegmentDescription.target_id.segment_id} from segmentation {selectedSegmentDescription.target_id.segmentation_id}:<br />{selectedSegmentDescription.name ?? 'Unnamed segment'}</b>}
-                {/* {selectedSegmentDescription && selectedSegmentDescription.description && selectedSegmentDescription.description.format === 'markdown' &&
-                    <>
-                        <br />
-                        <br />
-                        <b>Description: </b>
-                        <Markdown skipHtml>{selectedSegmentDescription.description.text}</Markdown>
-                    </>}
-                {selectedSegmentDescription && selectedSegmentDescription.description && selectedSegmentDescription.description.format === 'text' &&
-                    <>
-                        <br />
-                        <br />
-                        <b>Description: </b>
-                        <p>{selectedSegmentDescription.description.text}</p>
-                    </>} */}
                 {selectedSegmentDescription && selectedSegmentDescription.details &&
                     <DescriptionTextUI descriptionText={selectedSegmentDescription.details}></DescriptionTextUI>}
-                {/* {selectedSegmentDescription?.external_references?.map(ref => {
-                    return <p key={ref.id} style={{ marginTop: 4 }}>
-                        {ref.url ? <a href={ref.url}>{ref.resource}:{ref.accession}</a> :
-                            <small>{ref.resource}:{ref.accession}</small>}
-                        <br />
-                        <b>{capitalize(ref.label ? ref.label : '')}</b><br />
-                        {ref.description}
-                    </p>;
-                }
-                )} */}
                 {selectedSegmentDescription?.external_references &&
                     <ExternalReferencesUI externalReferences={selectedSegmentDescription.external_references}></ExternalReferencesUI>}
             </div>

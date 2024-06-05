@@ -23,7 +23,6 @@ export class VolsegShapePrimitivesData {
     }
 }
 
-// 'Data', try 'Object' later
 export class VolsegGeometricSegmentation extends PluginStateObject.Create<VolsegShapePrimitivesData>({ name: 'Vol & Seg Geometric Segmentation', typeClass: 'Data' }) { }
 
 
@@ -33,15 +32,6 @@ export function Cone() {
     return cone;
 }
 
-// export type ShapePrimitive =
-//     | { kind: 'sphere', center: number[], radius: number, label: string, color: number }
-//     | { kind: 'cylinder', start: number[], end: number[], radius: number, label: string, color: number }
-//     | { kind: 'box', translation: number[], scaling: number[], label: string, color: number }
-//     | { kind: 'pyramid', translation: number[], scaling: number[], label: string, color: number }
-//     | { kind: 'cone', translation: number[], scaling: number[], label: string, color: number }
-//     | { kind: 'ellipsoid', dir_major: number[], dir_minor: number[], center: number[], radius_scale: number[], label: string, color: number }
-
-// export type ShapePrimitivesData = ShapePrimitive[]
 
 function addBox(state: MeshBuilder.State,
     translation: Vec3 = Vec3.create(0.5, 0.5, 0.5),
@@ -62,21 +52,10 @@ function addTriangularPyramid(state: MeshBuilder.State,
     MeshBuilder.addPrimitive(state, mat4, TriangularPyramid());
 }
 
-// function addCone(state: MeshBuilder.State,
-//     translation: Vec3 = [0.5, 0.5, 0.5] as Vec3,
-//     scaling: Vec3 = [1, 1, 1] as Vec3) {
-//     const mat4 = Mat4.identity();
-//     Mat4.scale(mat4, mat4, scaling);
-//     Mat4.translate(mat4, mat4, translation);
-//     MeshBuilder.addPrimitive(state, mat4, Cone());
-// }
-
 export const isShapePrimitiveParamsValues = (value: CreateShapePrimitiveProviderParamsValues): value is CreateShapePrimitiveProviderParamsValues => !!value?.segmentAnnotations;
 
 export type CreateShapePrimitiveProviderParamsValues = PD.Values<typeof CreateShapePrimitiveProviderParams>;
 export const CreateShapePrimitiveProviderParams = {
-    // data: PD.Value<ShapePrimitiveData>([] as any, { isHidden: true }),
-    // data: PD.Value<BoxPrimitive | Sphere | Cylinder | Ellipsoid | PyramidPrimitive>([] as any, { isHidden: true }),
     segmentAnnotations: PD.Value<SegmentAnnotationData[]>([] as any, { isHidden: true }),
     descriptions: PD.Value<DescriptionData[]>([] as any, { isHidden: true }),
     segmentationId: PD.Text(''),
@@ -115,7 +94,6 @@ export const CreateShapePrimitiveProviderCVSX = Transform({
         return new PluginStateObject.Shape.Provider({
             label: 'Shape Primitives',
             data: params,
-            // data: params.data,
             params: Mesh.Params,
             geometryUtils: Mesh.Utils,
             getShape: (_, data) => createShapePrimitive(shapePrimitiveData, params)
@@ -141,8 +119,6 @@ function createShapePrimitive(data: ShapePrimitiveData, params: CreateShapePrimi
     const builder = MeshBuilder.createState(512, 512);
     const descriptions = params.descriptions;
     const segmentAnnotations = params.segmentAnnotations;
-    // TODO: instead of data, should be specific BoxPrimitive | Sphere | Cylinder | Ellipsoid | PyramidPrimitive
-    // selected based on params.segmentId
     const p = data.shape_primitive_list.find(s => s.id === params.segmentId);
     builder.currentGroup = 0;
     switch (p!.kind) {
@@ -189,9 +165,7 @@ function createShapePrimitive(data: ShapePrimitiveData, params: CreateShapePrimi
         params,
         MeshBuilder.getMesh(builder),
         g => Color.fromNormalizedArray(_get_target_segment_color(segmentAnnotations, p!.id), 0),
-        // g => Color.fromHexStyle(_get_target_segment_color_as_hex(segmentAnnotations, p!.id)),
         () => 1,
-        // g => data[g].label,
         g => _get_target_segment_name(descriptions, p!.id)
     );
 }

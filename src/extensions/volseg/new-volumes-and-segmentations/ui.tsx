@@ -142,9 +142,6 @@ function VolsegEntryControls({ entryData }: { entryData: VolsegEntryData }) {
     const entryDescriptions = allDescriptions.filter(d => d.target_kind === 'entry');
     const parsedSelectedSegmentKey = parseSegmentKey(state.selectedSegment);
     const { segmentationId, kind } = parsedSelectedSegmentKey;
-    // const selectedSegmentDescriptions = entryData.metadata.value!.getSegmentDescription(segmentId, segmentationId, kind);
-    // NOTE: for now single description
-    // const selectedSegmentDescription = selectedSegmentDescriptions ? selectedSegmentDescriptions[0] : undefined;
     const visibleModels = state.visibleModels.map(model => model.pdbId);
     const allPdbs = entryData.pdbs;
 
@@ -157,27 +154,8 @@ function VolsegEntryControls({ entryData }: { entryData: VolsegEntryData }) {
         </div>
         {entryDescriptions.length > 0 && entryDescriptions.map(e =>
             <EntryDescriptionUI key={e.id} entryDescriptionData={e}></EntryDescriptionUI>)}
-        {/* <JSONEditorComponent jsonData={annotationsJson} entryData={entryData}/> */}
         <Popup nested trigger={<Button>Annotation Editor</Button>} modal>
-            {/* <span> Modal content </span> */}
-            {/* TODO: fix this */}
-
-
-
-            {/* {close => (
-                <>
-                    <button className="close" onClick={close}>
-                        &times;
-                    </button>
-                    <JSONEditorComponent jsonData={annotationsJson} entryData={entryData} />
-                </>
-
-            )} */}
-
             <>
-                {/* <button className="close" onClick={close}>
-                    &times;
-                </button> */}
                 <JSONEditorComponent jsonData={annotationsJson} entryData={entryData} />
             </>
         </Popup>
@@ -201,8 +179,6 @@ function VolsegEntryControls({ entryData }: { entryData: VolsegEntryData }) {
 }
 
 function TimeFrameSlider({ entryData }: { entryData: VolsegEntryData }) {
-    // gets time info from volume
-    // should get it from files if available, not from metadata
     const timeInfo = entryData.metadata.value!.raw.grid.volumes.time_info;
     const timeInfoStart = timeInfo.start;
     const timeInfoValue = useBehavior(entryData.currentTimeframe);
@@ -249,8 +225,6 @@ function VolumeChannelControls({ entryData, volume }: { entryData: VolsegEntryDa
 function _getVisualTransformFromProjectDataTransform(model: VolsegEntryData, projectDataTransform: any) {
     const childRef = model.plugin.state.data.tree.children.get(projectDataTransform.ref).toArray()[0];
     const segmentationRepresentation3DNode = findNodesByRef(model.plugin, childRef);
-    // in case of CVSX segmentation.transform is already 3D representation
-    // how to get segmentation Id from it?
     const transform = segmentationRepresentation3DNode.transform;
     if (transform.params.descriptions) {
         const childChildRef = model.plugin.state.data.tree.children.get(segmentationRepresentation3DNode.transform.ref).toArray()[0];
@@ -267,13 +241,6 @@ function SegmentationSetControls({ model, segmentation, kind }: { model: VolsegE
 
     const segmentationId = params.segmentationId;
 
-
-    // TODO: if geometric segmentation - need child ref of child ref
-    // const childRef = model.plugin.state.data.tree.children.get(projectDataTransform.ref).toArray()[0];
-    // const segmentationRepresentation3DNode = findNodesByRef(model.plugin, childRef);
-    // // in case of CVSX segmentation.transform is already 3D representation
-    // // how to get segmentation Id from it?
-    // const transform = segmentationRepresentation3DNode.transform;
     const transform = _getVisualTransformFromProjectDataTransform(model, projectDataTransform);
     if (!transform) return null;
 
@@ -281,14 +248,10 @@ function SegmentationSetControls({ model, segmentation, kind }: { model: VolsegE
     if (transform.params?.type) {
         opacity = transform.params?.type.params.alpha;
     } else {
-        // TODO: fix
         opacity = transform.params.alpha;
     }
     return <ExpandGroup header={`${segmentationId}`}>
-        {/* TODO: use actual opacity */}
-        {/* <div>Segmentation</div> */}
         <ControlRow label='Opacity' control={
-            // TODO: problem is here
             <WaitingSlider min={0} max={1} value={opacity} step={0.05} onChange={async v => await model.actionSetOpacity(v, segmentationId, kind)} />
         } />
         <DescriptionsList
@@ -316,8 +279,6 @@ function VolumeControls({ entryData }: { entryData: VolsegEntryData }) {
 }
 
 export function SegmentationControls({ model }: { model: VolsegEntryData }) {
-    // TODO: do check for segmentation data and return null if no segmentation data
-    // can be a separate function that loops checks if segmentation ids is not null
     if (!model.metadata.value!.hasSegmentations()) {
         return null;
     }
@@ -329,7 +290,6 @@ export function SegmentationControls({ model }: { model: VolsegEntryData }) {
     }
     return <>
         <ExpandGroup header='Segmentation data'>
-            {/* TODO: just lattices, need geometric and mesh segmentations as well */}
             {h.segmentations.map((v) => {
                 return <SegmentationSetControls key={v.transform.ref} model={model} segmentation={v} kind={'lattice'} />;
             })}

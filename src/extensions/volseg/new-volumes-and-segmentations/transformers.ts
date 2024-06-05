@@ -90,15 +90,12 @@ export const ProjectSegmentationData = CreateTransformer({
         return Task.create('Project Volume Data', async ctx => {
             const { timeframeIndex, segmentationId } = params;
             const entry = spine.getAncestorOfType(VolsegEntry);
-            // const entry = a;
             const entryData = entry!.data;
             const rawData = await entryData.getData(timeframeIndex, segmentationId, 'segmentation') as Uint8Array | string;
 
-            // NOTE: label - segmentationId;
             const label = segmentationId;
 
             const parsed = await CIF.parse(rawData).runInContext(ctx);
-            // const parsed = await entryData.plugin.dataFormats.get('dscif')!.parse(entryData.plugin, data);
             if (parsed.isError) throw new Error(parsed.message);
             const cif = new PluginStateObject.Format.Cif(parsed.result);
 
@@ -108,11 +105,7 @@ export const ProjectSegmentationData = CreateTransformer({
             const segmentationCif = CIF.schema.segmentation(block);
             const segmentLabels: { [id: number]: string } = {};
 
-            // for (const segment of params.segmentLabels) segmentLabels[segment.id] = segment.label;
             for (const segment of params.segmentLabels) segmentLabels[segment.id] = '';
-            // TODO: check here segment labels;
-            // here params.segmentLabels has all 40 segment labels
-            // should have only segment labels for that timeframe?
             const volume = await volumeFromSegmentationData(segmentationCif, { label: label, segmentLabels: segmentLabels, ownerId: params.ownerId }).runInContext(ctx);
             const [x, y, z] = volume.grid.cells.space.dimensions;
             const props = { label: `ID: ${label}`, description: `${label} ${x}\u00D7${y}\u00D7${z}` };
@@ -131,15 +124,8 @@ export const ProjectMeshData = CreateTransformer({
     apply({ a, params, spine }, plugin: PluginContext) {
         return Task.create('Project Mesh Data', async ctx => {
             const { timeframeIndex, segmentationId } = params;
-            // TODO: alternatively to using a
             const entry = spine.getAncestorOfType(VolsegEntry);
-            // const entry = a;
             const entryData = entry!.data;
-            // const segmentsToCreate = entryData.metadata.value!.getMeshSegmentIdsForSegmentationIdAndTimeframe(segmentationId, timeframeIndex);
-
-            // const group = entryData.findNodesByTags('mesh-segmentation-group')[0]?.transform.ref;
-
-            // const totalVolume = entryData.metadata.value!.gridTotalVolume;
             const meshData: MeshData[] = [];
             const segmentsParams = params.meshSegmentParams;
             const rawDataArray: RawMeshSegmentData[] = await entryData.getData(timeframeIndex, segmentationId, 'mesh') as RawMeshSegmentData[];
@@ -162,16 +148,13 @@ export const ProjectMeshData = CreateTransformer({
     }
 });
 
-// params should be similar to mesh segmentation data
 export const ProjectGeometricSegmentationDataParams = {
     timeframeIndex: ParamDefinition.Numeric(0, { step: 1 }),
     segmentationId: ParamDefinition.Text('0'),
-    // ...VolsegMeshDataParams
 };
 
 export type ProjectGeometricSegmentationDataParamsValues = ParamDefinition.Values<typeof ProjectGeometricSegmentationDataParams>;
 
-// should have all geometric segmentation data
 export const ProjectGeometricSegmentationData = CreateTransformer({
     name: 'project-geometric-segmentation',
     display: { name: 'Project Geometric Segmentation', description: 'Project Geometric Segmentation' },
@@ -182,11 +165,8 @@ export const ProjectGeometricSegmentationData = CreateTransformer({
     apply({ a, params, spine }, plugin: PluginContext) {
         return Task.create('Project Geometric Segmentation Data', async ctx => {
             const { timeframeIndex, segmentationId } = params;
-            // TODO: alternatively to using a
             const entry = spine.getAncestorOfType(VolsegEntry);
-            // const entry = a;
             const entryData = entry!.data;
-            // const shapePrimitiveData = await entryData._loadGeometricSegmentationData(timeframeIndex, segmentationId);
             const shapePrimitiveData = await entryData.getData(timeframeIndex, segmentationId, 'primitive') as ShapePrimitiveData;
             return new VolsegGeometricSegmentation(new VolsegShapePrimitivesData(shapePrimitiveData), { label: `Segmentation ID: ${segmentationId}` });
         });
@@ -216,11 +196,8 @@ export const VolsegEntryFromRoot = CreateTransformer({
 export const VolsegEntryFromFile = CreateTransformer({
     name: 'volseg-entry-from-file',
     display: { name: 'Vol & Seg Entry', description: 'Vol & Seg Entry' },
-    // from: PluginStateObject.Root,
-    // TODO: could be Blob
     from: PluginStateObject.Data.Binary,
     to: VolsegEntry,
-    // params: (a, plugin: PluginContext) => createVolsegEntryParams(plugin),
 })({
     apply({ a, params }, plugin: PluginContext) {
         return Task.create('Load Vol & Seg Entry', async (ctx) => {
