@@ -200,7 +200,6 @@ export const VolsegMeshDataParams = {
     meshSegmentParams: PD.ObjectList(meshSegmentParams, s => s.id.toString()),
 };
 export type VolsegMeshDataParamsValues = PD.Values<typeof VolsegMeshDataParams>;
-// export type VolsegMeshData = PD.Values<typeof VolsegMeshDataParams>;
 
 export type MeshData = {
     meshSegmentParams: meshSegmentParamsValues,
@@ -239,10 +238,8 @@ export const CreateMeshlistStateObject = VolsegTransform({
             meshlistData.ownerId = params.ownerId;
             meshlistData.segmentationId = params.segmentationId;
             const es = meshlistData.meshIds.length === 1 ? '' : 'es';
-            // TODO: make label something meaningful
             const cleanText = label.replace(/<\/?[^>]+(>|$)/g, '');
             return new MeshlistStateObject(meshlistData, { label: cleanText, description: `${cleanText} (${meshlistData.meshIds.length} mesh${es})` });
-            return new MeshlistStateObject(meshlistData);
         });
     }
 });

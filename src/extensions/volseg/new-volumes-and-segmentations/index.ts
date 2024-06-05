@@ -12,7 +12,7 @@ import { StateAction } from '../../../mol-state';
 import { Task } from '../../../mol-task';
 import { DEFAULT_VOLSEG_SERVER, VolumeApiV2 } from './volseg-api/api';
 
-import { GEOMETRIC_SEGMENTATION_NODE_TAG, MESH_SEGMENTATION_NODE_TAG, SEGMENTATION_NODE_TAG, VOLUME_NODE_TAG, VolsegEntryData, VolsegEntryParamValues, createLoadVolsegParams } from './entry-root';
+import { GEOMETRIC_SEGMENTATION_NODE_TAG, MESH_SEGMENTATION_NODE_TAG, LATTICE_SEGMENTATION_NODE_TAG, VOLUME_NODE_TAG, VolsegEntryData, VolsegEntryParamValues, createLoadVolsegParams } from './entry-root';
 import { VolsegGlobalState } from './global-state';
 import { createEntryId } from './helpers';
 import { ProjectGeometricSegmentationData, ProjectGeometricSegmentationDataParamsValues, ProjectMeshData, ProjectMeshSegmentationDataParamsValues, ProjectSegmentationData, ProjectLatticeSegmentationDataParamsValues, ProjectVolumeData, VolsegEntryFromRoot, VolsegGlobalStateFromRoot, VolsegStateFromEntry } from './transformers';
@@ -130,7 +130,7 @@ export const LoadVolseg = StateAction.build({
                 const group = await entryNode.data.latticeSegmentationData.createSegmentationGroup();
                 const segmentationIds = hasLattices.segmentation_ids;
                 for (const segmentationId of segmentationIds) {
-                    const descriptionsForLattice = entryNode.data.metadata.value!.getAllDescriptionsForSegmentationAndTimeframe(
+                    const descriptionsForLattice = entryNode.data.metadata.value!.getDescriptions(
                         segmentationId,
                         'lattice',
                         0
@@ -142,7 +142,7 @@ export const LoadVolseg = StateAction.build({
                         segmentLabels: segmentLabels,
                         ownerId: entryNode.data.ref
                     };
-                    const segmentationNode = await state.build().to(group).apply(ProjectSegmentationData, segmentationParams, { tags: [SEGMENTATION_NODE_TAG] }).commit();
+                    const segmentationNode = await state.build().to(group).apply(ProjectSegmentationData, segmentationParams, { tags: [LATTICE_SEGMENTATION_NODE_TAG] }).commit();
                     await entryNode.data.latticeSegmentationData.createSegmentationRepresentation3D(segmentationNode, segmentationParams);
                 }
             };
@@ -182,7 +182,7 @@ export const LoadVolseg = StateAction.build({
                     await entryNode.data.geometricSegmentationData.createGeometricSegmentationRepresentation3D(geometricSegmentationNode, geometricSegmentationParams);
                 }
             }
-            const allAnnotationsForTimeframe = entryData.metadata.value!.getAllAnnotationsForTimeframe(0);
+            const allAnnotationsForTimeframe = entryData.metadata.value!.getAllAnnotations(0);
             const allSegmentKeysForTimeframe = allAnnotationsForTimeframe.map(a => {
                 return createSegmentKey(a.segment_id, a.segmentation_id, a.segment_kind);
             }

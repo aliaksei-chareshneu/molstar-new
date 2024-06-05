@@ -37,20 +37,18 @@ export class VolsegGeometricSegmentationData {
 
     async createGeometricSegmentationRepresentation3D(gsNode: StateObjectSelector<VolsegGeometricSegmentation>, params: ProjectGeometricSegmentationDataParamsValues) {
         const gsData: VolsegShapePrimitivesData = gsNode.cell!.obj!.data;
-        // const update = this.entryData.plugin.build().to(gsNode);
         const { timeframeIndex, segmentationId } = params;
-        const descriptions = this.entryData.metadata.value!.getAllDescriptionsForSegmentationAndTimeframe(segmentationId, 'primitive', timeframeIndex);
+        const descriptions = this.entryData.metadata.value!.getDescriptions(segmentationId, 'primitive', timeframeIndex);
         const segmentAnnotations = this.entryData.metadata.value!.getAllSegmentAnotationsForSegmentationAndTimeframe(segmentationId, 'primitive', timeframeIndex);
+        const update = this.entryData.newUpdate().to(gsNode.ref);
         for (const primitiveData of gsData.shapePrimitiveData.shape_primitive_list) {
-            await this.entryData.newUpdate().to(gsNode.ref)
-            // TODO: can provide a single description and a single segment annotation
+            update
                 .apply(CreateShapePrimitiveProvider, { segmentId: primitiveData.id, descriptions: descriptions, segmentAnnotations: segmentAnnotations, segmentationId: segmentationId })
                 // TODO: shape representation 3d could have no alpha
-                // TODO: get alpha from transform somehow 
+                // TODO: get alpha from transform somehow
                 .apply(StateTransforms.Representation.ShapeRepresentation3D, { alpha: 0.5 }, { tags: ['geometric-segmentation-visual', segmentationId, `segment-${primitiveData.id}`] })
-                .commit();
         }
-        // await update.commit();
+        await update.commit();
     }
 
 
@@ -77,7 +75,6 @@ export class VolsegGeometricSegmentationData {
     }
 
     updateOpacity(opacity: number, segmentationId: string) {
-        debugger;
         const visuals = this.entryData.findNodesByTags('geometric-segmentation-visual', segmentationId);
         const update = this.entryData.newUpdate();
         for (const visual of visuals) {
@@ -90,7 +87,6 @@ export class VolsegGeometricSegmentationData {
         if (segment === undefined || segment < 0 || segmentationId === undefined) return;
         const visuals = this.entryData.findNodesByTags('geometric-segmentation-visual', `segment-${segment}`, segmentationId);
         const reprNode: PluginStateObject.Shape.Representation3D | undefined = visuals[0]?.obj;
-        debugger;
         if (!reprNode) return;
         const loci = reprNode.data.repr.getAllLoci()[0];
         debugger;

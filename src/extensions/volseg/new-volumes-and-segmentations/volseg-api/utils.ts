@@ -104,7 +104,7 @@ export class MetadataWrapper {
         }
     }
 
-    getAllDescriptionsForSegmentationAndTimeframe(segmentationId: string, kind: 'lattice' | 'mesh' | 'primitive', timeframeIndex: number) {
+    getDescriptions(segmentationId: string, kind: 'lattice' | 'mesh' | 'primitive', timeframeIndex: number) {
         const allDescriptions = this.allDescriptions;
         const allDescriptonsForSegmentationId = allDescriptions.filter(d =>
             d.target_id && d.target_id.segmentation_id === segmentationId && d.target_kind === kind
@@ -130,7 +130,7 @@ export class MetadataWrapper {
         const annotations = this.raw.annotation?.segment_annotations;
         if (annotations) return annotations; else return [];
     }
-    getAllAnnotationsForTimeframe(timeframeIndex: number) {
+    getAllAnnotations(timeframeIndex: number) {
         const allSegmentsForTimeframe = this.allAnnotations.filter(a => {
             if (a.hasOwnProperty('time') && Number.isFinite(a.time)) {
                 if (timeframeIndex === a.time) {
@@ -191,7 +191,6 @@ export class MetadataWrapper {
     }
 
     getSegmentDescription(segmentId: number, segmentationId: string, kind: 'lattice' | 'mesh' | 'primitive'): DescriptionData[] | undefined {
-        // NOTE: for now assumes single lattice, single mesh set etc.
         const segmentKey = createSegmentKey(segmentId, segmentationId, kind);
         if (this.allDescriptions) {
             // create segment map
@@ -215,12 +214,6 @@ export class MetadataWrapper {
             return this.segmentMap.get(segmentKey);
         }
     }
-
-    // TODO: apparently for meshes
-    // getSegmentColor(segmentId: number): Color | undefined {
-    //     const colorArray = this.getSegmentDescription(segmentId)?.color;
-    //     return colorArray ? Color.fromNormalizedArray(colorArray, 0) : undefined;
-    // }
 
     /** Get the list of detail levels available for the given mesh segment. */
     getMeshDetailLevels(segmentationId: string, timeframe: number, segmentId: number): number[] {
@@ -268,9 +261,6 @@ export class MetadataWrapper {
     }
 
     filterDescriptions(d: DescriptionData[], keyword: string) {
-        // for each description
-        // loop over metadata fields
-        // compare value of each field with keyword
         if (keyword === '') return d;
         const kw = keyword.toLowerCase();
         const filtered = d.filter(i => {
@@ -286,7 +276,6 @@ export class MetadataWrapper {
             }
         }
         );
-        // suppose no segments
         return filtered;
     }
 
@@ -311,12 +300,6 @@ export class MetadataWrapper {
 
         return allAnnotationsForSegmentationIdAndTimeframe;
     }
-
-    // get meshSegmentIds() {
-    //     const segmentIds = this.raw.grid.segmentation_meshes.mesh_component_numbers.segment_ids;
-    //     if (!segmentIds) return [];
-    //     return Object.keys(segmentIds).map(s => parseInt(s));
-    // }
 
     get gridTotalVolume() {
         const currentVolumeDownsampling = this.currentVolumeDownsampling;

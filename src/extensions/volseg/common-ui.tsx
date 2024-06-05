@@ -119,7 +119,7 @@ export function DescriptionsList({ model, targetSegmentationId, targetKind }: { 
     const metadata = useBehavior(model.metadata);
     // const allDescriptions = metadata!.allDescriptions;
     // is there a method in metadata that gets all descriptions for target segmentation id and kind?
-    const allDescriptionsForSegmentationId = metadata!.getAllDescriptionsForSegmentationAndTimeframe(
+    const allDescriptionsForSegmentationId = metadata!.getDescriptions(
         targetSegmentationId,
         targetKind,
         currentTimeframe

@@ -17,10 +17,9 @@ export interface ShapePrimitiveData {
 }
 
 export interface ShapePrimitiveBase {
-    // # NOTE: to be able to refer to it in annotations
+    // to be able to refer to it in annotations
     id: number
     kind: ShapePrimitiveKind
-    // # NOTE: color in annotations
 }
 
 export type ShapePrimitiveKind = 'sphere' | 'tube' | 'cylinder' | 'box' | 'ellipsoid' | 'pyramid'
@@ -31,15 +30,14 @@ export interface RotationParameters {
 }
 
 export interface Sphere extends ShapePrimitiveBase {
-    // # in angstroms
+    // in angstroms
     center: Vec3
     radius: number
 }
 
 export interface BoxPrimitive extends ShapePrimitiveBase {
-    // # with respect to origin 0, 0, 0
+    // with respect to origin 0, 0, 0
     translation: Vec3
-    // # default size 2, 2, 2 in angstroms for pdbe-1.rec
     scaling: Vec3
     rotation: RotationParameters
 }
@@ -59,9 +57,8 @@ export interface Ellipsoid extends ShapePrimitiveBase {
 }
 
 export interface PyramidPrimitive extends ShapePrimitiveBase {
-    // # with respect to origin 0, 0, 0
+    // with respect to origin 0, 0, 0
     translation: Vec3
-    // # default size 2, 2, 2 in angstroms for pdbe-1.rec
     scaling: Vec3
     rotation: RotationParameters
 }
@@ -165,7 +162,7 @@ export interface VolumeDescriptiveStatistics {
 }
 
 export interface TimeTransformation {
-    // # to which downsampling level it is applied: can be to specific level, can be to all lvls
+    // to which downsampling level it is applied: can be to specific level, can be to all lvls
     downsampling_level: 'all' | number
     factor: number
 }
@@ -193,7 +190,7 @@ export interface SegmentationLatticesMetadata {
     // e.g. label groups (Cell, Chromosomes)
     segmentation_ids: string[]
     segmentation_sampling_info: { [lattice_id: string]: SamplingInfo }
-    // #maps lattice id to TimeInfo
+    // maps lattice id to TimeInfo
     time_info: { [segmentation_id: string]: TimeInfo }
 }
 
@@ -207,7 +204,6 @@ export interface AnnotationMetadata {
     entry_id: EntryId
     // id => DescriptionData
     descriptions: { [id: string]: DescriptionData }
-    // NOTE: on frontend, segment key = `${kind}:{segmentation_id}:{segment_id}`
     segment_annotations: SegmentAnnotationData[]
     details?: string
     volume_channels_annotations?: ChannelAnnotation[]
@@ -262,29 +258,6 @@ export interface ExternalReference {
     description?: string
     url?: string
 }
-
-// export interface Segment {
-//     id: number
-//     color: Vector4
-//     biological_annotation: BiologicalAnnotation
-//     extra_annotations: BiologicalAnnotation | undefined
-// }
-
-// export interface SegmentationLatticeInfo {
-//     lattice_id: number
-//     segment_list: Segment[]
-// }
-
-// export interface BiologicalAnnotation {
-//     name: string
-//     external_references: ExternalReference[]
-//     is_hidden: boolean | undefined
-// }
-
-// export interface ExternalReference {
-//     id: number, resource: string, accession: string, label: string,
-//     description: string
-// }
 
 type Vector2 = [number, number];
 type Vector3 = [number, number, number];

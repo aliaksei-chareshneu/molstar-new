@@ -1,7 +1,7 @@
 import { PluginStateObject } from '../../../mol-plugin-state/objects';
 import { PluginContext } from '../../../mol-plugin/context';
 import { StateObjectRef } from '../../../mol-state';
-import { GEOMETRIC_SEGMENTATION_NODE_TAG, MESH_SEGMENTATION_NODE_TAG, SEGMENTATION_NODE_TAG, VOLUME_NODE_TAG } from '../new-volumes-and-segmentations/entry-root';
+import { GEOMETRIC_SEGMENTATION_NODE_TAG, MESH_SEGMENTATION_NODE_TAG, LATTICE_SEGMENTATION_NODE_TAG, VOLUME_NODE_TAG } from '../new-volumes-and-segmentations/entry-root';
 import { ProjectGeometricSegmentationData, ProjectGeometricSegmentationDataParamsValues, ProjectLatticeSegmentationDataParamsValues, ProjectMeshData, ProjectMeshSegmentationDataParamsValues, ProjectSegmentationData, ProjectVolumeData, VolsegEntryFromFile, VolsegGlobalStateFromFile, VolsegStateFromEntry } from '../new-volumes-and-segmentations/transformers';
 import { getSegmentLabelsFromDescriptions } from '../new-volumes-and-segmentations/volseg-api/utils';
 
@@ -14,10 +14,10 @@ export async function loadCVSXFromAnything(plugin: PluginContext, data: StateObj
 
     if (entryNode.data) {
         // TODO: change - get from filesIndex, but from metadata is ok too
+        // since query contains a single timeframe, or all
         const entryData = entryNode.data;
         let timeframeIndex = entryData.metadata!.value!.raw.grid.volumes.time_info.start;
         let channelIds = entryData.metadata!.value!.raw.grid.volumes.channel_ids;
-        // const currentTimeframe = entryData.currentTimeframe.value;
         if (entryData.filesData!.query.channel_id) {
             channelIds = [entryData.filesData!.query.channel_id];
         }
@@ -49,35 +49,26 @@ export async function loadCVSXFromAnything(plugin: PluginContext, data: StateObj
         await entryNode.data.updateStateNode({ channelsData: [...updatedChannelsData] });
         const hasLattices = entryData.filesData?.latticeSegmentations;
         if (hasLattices) {
-            // let segmentationIds = hasLattices.segmentation_ids;
             // filter only lattices for timeframeIndex
             const latticesForTimeframeIndex = hasLattices.filter(l => l.timeframeIndex === timeframeIndex);
             const segmentationIds = latticesForTimeframeIndex.map(l => l.segmentationId);
-            // if (entryData.filesData!.query.segmentation_id) {
-            //     segmentationIds = [entryData.filesData!.query.segmentation_id];
-            // }
+
             // loop over lattices and create one for each
             const group = await entryNode.data.latticeSegmentationData.createSegmentationGroup();
             for (const segmentationId of segmentationIds) {
-                // const segmentationId = hasLattices.segmentation_sampling_info
-                // same, single channel single timeframe
-
-                // const segmentationIds = hasLattices.segmentation_ids;
-                // for (const segmentationId of segmentationIds) {
-                const descriptionsForLattice = entryNode.data.metadata.value!.getAllDescriptionsForSegmentationAndTimeframe(
+                const descriptionsForLattice = entryNode.data.metadata.value!.getDescriptions(
                     segmentationId,
                     'lattice',
                     timeframeIndex
                 );
                 const segmentLabels = getSegmentLabelsFromDescriptions(descriptionsForLattice);
-                // const segmentLabels = [];
                 const segmentationParams: ProjectLatticeSegmentationDataParamsValues = {
                     timeframeIndex: timeframeIndex,
                     segmentationId: segmentationId,
                     segmentLabels: segmentLabels as any,
                     ownerId: entryNode.data.ref
                 };
-                const segmentationNode = await plugin.build().to(group).apply(ProjectSegmentationData, segmentationParams, { tags: [SEGMENTATION_NODE_TAG] }).commit();
+                const segmentationNode = await plugin.build().to(group).apply(ProjectSegmentationData, segmentationParams, { tags: [LATTICE_SEGMENTATION_NODE_TAG] }).commit();
                 await entryNode.data.latticeSegmentationData.createSegmentationRepresentation3D(segmentationNode, segmentationParams);
             }
 
@@ -86,30 +77,20 @@ export async function loadCVSXFromAnything(plugin: PluginContext, data: StateObj
         const hasGeometricSegmentation = entryData.filesData?.geometricSegmentations;
         if (hasGeometricSegmentation) {
             const segmentationIds = hasGeometricSegmentation.map(g => g.segmentationId);
-            // if (entryData.filesData!.query.segmentation_id) {
-            //     segmentationIds = [entryData.filesData!.query.segmentation_id];
-            // }
-
             const group = await entryNode.data.geometricSegmentationData.createGeometricSegmentationGroup();
             for (const segmentationId of segmentationIds) {
-                // const segmentationId: string = entryData.filesData!.query.args.segmentation_id;
                 const geometricSegmentationParams: ProjectGeometricSegmentationDataParamsValues = {
                     segmentationId: segmentationId,
                     timeframeIndex: timeframeIndex
                 };
                 const geometricSegmentationNode = await plugin.build().to(group).apply(ProjectGeometricSegmentationData, geometricSegmentationParams, { tags: [GEOMETRIC_SEGMENTATION_NODE_TAG] }).commit();
                 await entryNode.data.geometricSegmentationData.createGeometricSegmentationRepresentation3D(geometricSegmentationNode, geometricSegmentationParams);
-                // }
             }
         }
 
         const hasMeshes = entryData.filesData?.meshSegmentations;
-        // const hasMeshes = entryNode.data.metadata.value!.hasMeshSegmentations();
         if (hasMeshes) {
             const segmentationIds = hasMeshes.map(m => m.segmentationId);
-            // if (entryData.filesData!.query.segmentation_id) {
-            //     segmentationIds = [entryData.filesData!.query.segmentation_id];
-            // }
             const group = await entryNode.data.meshSegmentationData.createMeshGroup();
             for (const segmentationId of segmentationIds) {
                 const meshSegmentParams = entryData.meshSegmentationData.getMeshSegmentParams(segmentationId, timeframeIndex);
@@ -118,7 +99,6 @@ export async function loadCVSXFromAnything(plugin: PluginContext, data: StateObj
                     segmentationId: segmentationId,
                     timeframeIndex: timeframeIndex
                 };
-                debugger;
                 const meshNode = await plugin.build().to(group).apply(ProjectMeshData, meshParams, { tags: [MESH_SEGMENTATION_NODE_TAG] }).commit();
                 await entryNode.data.meshSegmentationData.createMeshRepresentation3D(meshNode, meshParams);
             }

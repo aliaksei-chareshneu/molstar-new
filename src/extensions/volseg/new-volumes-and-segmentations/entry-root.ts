@@ -53,7 +53,7 @@ export const BOX: [[number, number, number], [number, number, number]] | null = 
 // export const BOX: [[number, number, number], [number, number, number]] | null = [[-90, -90, -90], [90, 90, 90]]; // DEBUG
 
 export const VOLUME_NODE_TAG = 'volume-node-tag';
-export const SEGMENTATION_NODE_TAG = 'segmenation-node-tag';
+export const LATTICE_SEGMENTATION_NODE_TAG = 'segmenation-node-tag';
 
 export function createLoadVolsegParams(plugin?: PluginContext, entrylists: { [source: string]: string[] } = {}) {
     const defaultVolumeServer = plugin?.config.get(NewVolsegVolumeServerConfig.DefaultServer) ?? DEFAULT_VOLSEG_SERVER;
@@ -406,7 +406,7 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
 
     sync() {
         const volumes = this.findNodesByTags(VOLUME_NODE_TAG);
-        const segmentations = this.findNodesByTags(SEGMENTATION_NODE_TAG);
+        const segmentations = this.findNodesByTags(LATTICE_SEGMENTATION_NODE_TAG);
         const geometricSegmentations = this.findNodesByTags(GEOMETRIC_SEGMENTATION_NODE_TAG);
         const meshSegmentations = this.findNodesByTags(MESH_SEGMENTATION_NODE_TAG);
         this.state.hierarchy.next({ volumes, segmentations, geometricSegmentations, meshSegmentations });
@@ -831,7 +831,7 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             const oldParams: ProjectLatticeSegmentationDataParamsValues = s.transform.params;
             // TODO: here get descriptions for segmentation and timeframe
             // and set segmentLabels
-            const descriptionsForLattice = this.metadata.value!.getAllDescriptionsForSegmentationAndTimeframe(
+            const descriptionsForLattice = this.metadata.value!.getDescriptions(
                 oldParams.segmentationId,
                 'lattice',
                 this.currentTimeframe.value

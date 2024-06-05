@@ -17,10 +17,6 @@ export class VolumeApiV2 {
         this.volumeServerUrl = volumeServerUrl.replace(/\/$/, ''); // trim trailing slash
     }
 
-    // @app.post("/v1/{source}/{id}/annotations_json/update")
-    // async def annotations_json_update(source: str, id: str,
-    //     annotations_json: AnnotationsMetadata = Body(..., embed=True)
-    // ) -> None:
     public async updateAnnotationsJson(source: string, entryId: string, annotationsJson: AnnotationMetadata) {
         const url = `${this.volumeServerUrl}/${source}/${entryId}/annotations_json/update`;
         const obj = JSON.stringify({ annotations_json: annotationsJson });
@@ -31,15 +27,12 @@ export class VolumeApiV2 {
         });
     }
 
-    // @app.post("/v2/{source}/{id}/descriptions/edit")
     public async editDescriptionsUrl(source: string, entryId: string, descriptionData: DescriptionData[]) {
         const url = `${this.volumeServerUrl}/${source}/${entryId}/descriptions/edit`;
         const obj = JSON.stringify({ descriptions: descriptionData });
         await fetch(url, {
             method: 'POST',
-            // body: JSON.stringify({notification: {title: message},to : '/topics/user_'+username}),
             body: obj,
-            // headers: {'Content-Type': 'application/json', 'Authorization': 'key='+API_KEY}
             headers: { 'Content-Type': 'application/json' }
         });
     }
@@ -48,9 +41,7 @@ export class VolumeApiV2 {
         const obj = JSON.stringify({ segment_annotations: segmentAnnotationData });
         await fetch(url, {
             method: 'POST',
-            // body: JSON.stringify({notification: {title: message},to : '/topics/user_'+username}),
             body: obj,
-            // headers: {'Content-Type': 'application/json', 'Authorization': 'key='+API_KEY}
             headers: { 'Content-Type': 'application/json' }
         });
     }
@@ -59,22 +50,17 @@ export class VolumeApiV2 {
         const obj = JSON.stringify({ description_ids: description_ids });
         await fetch(url, {
             method: 'POST',
-            // body: JSON.stringify({notification: {title: message},to : '/topics/user_'+username}),
             body: obj,
-            // headers: {'Content-Type': 'application/json', 'Authorization': 'key='+API_KEY}
             headers: { 'Content-Type': 'application/json' }
         });
     }
 
-    // removeSegmentAnnotationsUrl
     public async removeSegmentAnnotationsUrl(source: string, entryId: string, annotation_ids: string[]) {
         const url = `${this.volumeServerUrl}/${source}/${entryId}/segment_annotations/remove`;
         const obj = JSON.stringify({ annotation_ids: annotation_ids });
         await fetch(url, {
             method: 'POST',
-            // body: JSON.stringify({notification: {title: message},to : '/topics/user_'+username}),
             body: obj,
-            // headers: {'Content-Type': 'application/json', 'Authorization': 'key='+API_KEY}
             headers: { 'Content-Type': 'application/json' }
         });
     }
@@ -95,7 +81,6 @@ export class VolumeApiV2 {
         }
     }
 
-    // @app.get("/v2/{source}/{id}/segmentation/box/{segmentation}/{time}/{a1}/{a2}/{a3}/{b1}/{b2}/{b3}")
     public latticeUrl(source: string, entryId: string, segmentation: string, timeframe: number, box: [[number, number, number], [number, number, number]] | null, maxPoints: number): string {
         if (box) {
             const [[a1, a2, a3], [b1, b2, b3]] = box;
@@ -104,10 +89,11 @@ export class VolumeApiV2 {
             return `${this.volumeServerUrl}/${source}/${entryId}/segmentation/cell/${segmentation}/${timeframe}?max_points=${maxPoints}`;
         }
     }
+
     public geometricSegmentationUrl(source: string, entryId: string, segmentation_id: string, timeframe: number) {
         return `${this.volumeServerUrl}/${source}/${entryId}/geometric_segmentation/${segmentation_id}/${timeframe}`;
     }
-    // @app.get("/v2/{source}/{id}/mesh/{segmentation_id}/{time}/{segment_id}/{detail_lvl}")
+
     public meshUrl_Json(source: string, entryId: string, segmentation_id: string, timeframe: number, segment: number, detailLevel: number): string {
         return `${this.volumeServerUrl}/${source}/${entryId}/mesh/${segmentation_id}/${timeframe}/${segment}/${detailLevel}`;
     }
