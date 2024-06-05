@@ -12,7 +12,7 @@ import { setSubtreeVisibility } from '../../../mol-plugin/behavior/static/state'
 import { PluginCommands } from '../../../mol-plugin/commands';
 import { StateObjectSelector } from '../../../mol-state';
 import { VolsegEntryData } from './entry-root';
-import { CreateShapePrimitiveProvider, VolsegGeometricSegmentation, VolsegShapePrimitivesData } from './shape_primitives';
+import { CreateShapePrimitiveProvider, VolsegGeometricSegmentation, VolsegShapePrimitivesData, _get_target_segment_color } from './shape_primitives';
 import { ProjectGeometricSegmentationDataParamsValues } from './transformers';
 
 
@@ -42,11 +42,11 @@ export class VolsegGeometricSegmentationData {
         const segmentAnnotations = this.entryData.metadata.value!.getAllSegmentAnotationsForSegmentationAndTimeframe(segmentationId, 'primitive', timeframeIndex);
         const update = this.entryData.newUpdate().to(gsNode.ref);
         for (const primitiveData of gsData.shapePrimitiveData.shape_primitive_list) {
+            const color = _get_target_segment_color(segmentAnnotations, primitiveData.id);
+            const opacity = color[3];
             update
                 .apply(CreateShapePrimitiveProvider, { segmentId: primitiveData.id, descriptions: descriptions, segmentAnnotations: segmentAnnotations, segmentationId: segmentationId })
-                // TODO: shape representation 3d could have no alpha
-                // TODO: get alpha from transform somehow
-                .apply(StateTransforms.Representation.ShapeRepresentation3D, { alpha: 0.5 }, { tags: ['geometric-segmentation-visual', segmentationId, `segment-${primitiveData.id}`] });
+                .apply(StateTransforms.Representation.ShapeRepresentation3D, { alpha: opacity }, { tags: ['geometric-segmentation-visual', segmentationId, `segment-${primitiveData.id}`] });
         }
         await update.commit();
     }

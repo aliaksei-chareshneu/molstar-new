@@ -89,7 +89,7 @@ function _get_target_segment_name(allDescriptions: DescriptionData[], segment_id
     return description[0].name!;
 }
 
-function _get_target_segment_color(allSegmentAnnotations: SegmentAnnotationData[], segment_id: number) {
+export function _get_target_segment_color(allSegmentAnnotations: SegmentAnnotationData[], segment_id: number) {
     // NOTE: for now single annotation, should be single one
     const annotation = allSegmentAnnotations.find(a => a.segment_id === segment_id);
     const color = annotation?.color ?? [0.9, 0.9, 0.9, 1.0];
