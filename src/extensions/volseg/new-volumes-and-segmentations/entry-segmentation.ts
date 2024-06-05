@@ -67,7 +67,6 @@ export class VolsegLatticeSegmentationData {
 
     async createSegmentationGroup() {
         this.createColorMap();
-        debugger;
         let group = this.entryData.findNodesByTags(GROUP_TAG)[0]?.transform.ref;
         if (!group) {
             const newGroupNode = await this.entryData.newUpdate().apply(CreateGroup,
@@ -131,7 +130,6 @@ export class VolsegLatticeSegmentationData {
     }
 
     async updateOpacity(opacity: number, segmentationId: string) {
-        debugger;
         const s = this.entryData.findNodesByTags(SEGMENT_VISUAL_TAG, segmentationId)[0];
         const update = this.entryData.newUpdate();
         // for (const s of reprs) {

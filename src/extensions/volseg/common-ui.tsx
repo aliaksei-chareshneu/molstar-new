@@ -73,7 +73,7 @@ export const MetadataTextFilter = ({ setFilteredDescriptions, descriptions, mode
             onChange={newText => {
                 setText(newText);
                 const filteredDescriptions = filterDescriptions(newText);
-                debugger;
+
                 setFilteredDescriptions(filteredDescriptions);
             }}
         />

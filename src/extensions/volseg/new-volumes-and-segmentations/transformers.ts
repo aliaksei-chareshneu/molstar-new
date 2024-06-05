@@ -186,7 +186,6 @@ export const ProjectGeometricSegmentationData = CreateTransformer({
             const entry = spine.getAncestorOfType(VolsegEntry);
             // const entry = a;
             const entryData = entry!.data;
-            debugger;
             // const shapePrimitiveData = await entryData._loadGeometricSegmentationData(timeframeIndex, segmentationId);
             const shapePrimitiveData = await entryData.getData(timeframeIndex, segmentationId, 'primitive') as ShapePrimitiveData;
             return new VolsegGeometricSegmentation(new VolsegShapePrimitivesData(shapePrimitiveData), { label: `Segmentation ID: ${segmentationId}` });
@@ -226,7 +225,6 @@ export const VolsegEntryFromFile = CreateTransformer({
     apply({ a, params }, plugin: PluginContext) {
         return Task.create('Load Vol & Seg Entry', async (ctx) => {
             const data = await VolsegEntryData.createFromFile(plugin, a.data, ctx);
-            debugger;
             return new VolsegEntry(data, { label: data.entryId, description: 'Vol & Seg Entry' });
         });
     },

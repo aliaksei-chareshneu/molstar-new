@@ -100,7 +100,6 @@ export class CVSXData {
         const meshesInfo = this.cvsxFilesIndex.meshSegmentations;
         if (!rawData || !meshesInfo) return undefined;
         for (const m of meshesInfo) {
-            debugger;
             const targetSegments = rawData.filter(r => m.segmentsFilenames.includes(r[0]));
             const d: CVSXMeshSegmentationData = {
                 segmentationId: m.segmentationId,

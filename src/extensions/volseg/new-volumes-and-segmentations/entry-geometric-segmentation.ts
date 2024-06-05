@@ -89,7 +89,6 @@ export class VolsegGeometricSegmentationData {
         const reprNode: PluginStateObject.Shape.Representation3D | undefined = visuals[0]?.obj;
         if (!reprNode) return;
         const loci = reprNode.data.repr.getAllLoci()[0];
-        debugger;
         if (!loci) return;
         this.entryData.plugin.managers.interactivity.lociSelects.select({ loci: loci, repr: reprNode.data.repr }, false);
     }

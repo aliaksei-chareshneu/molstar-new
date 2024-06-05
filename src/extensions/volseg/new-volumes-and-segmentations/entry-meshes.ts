@@ -80,32 +80,19 @@ export class VolsegMeshSegmentationData {
                 )
                 .commit();
         }
-        // this.entryData.actionShowSegments(this.entryData.metadata.value!.meshSegmentIds);
     }
 
     getMeshSegmentParams(segmentationId: string, timeframeIndex: number) {
         const params: meshSegmentParamsValues[] = [];
-        // segments to create should be extracted from specific mesh segmentation
-        // need mesh segmentation id
         const segmentsToCreate = this.entryData.metadata.value!.getMeshSegmentIdsForSegmentationIdAndTimeframe(segmentationId, timeframeIndex);
         const segmentAnnotations = this.entryData.metadata.value!.getAllSegmentAnotationsForSegmentationAndTimeframe(
             segmentationId,
             'mesh',
             timeframeIndex
         );
-        // const descriptions = this.entryData.metadata.value!.getAllDescriptionsForSegmentationAndTimeframe(
-        //     segmentationId,
-        //     'mesh',
-        //     timeframeIndex
-        // );
-        // label - from descriptions
         for (const seg of segmentsToCreate) {
             const colorData = segmentAnnotations.find(a => a.segment_id === seg)?.color;
             const color = colorData && colorData.length >= 3 ? Color.fromNormalizedArray(colorData, 0) : ColorNames.gray;
-            // NOTE: for now single description
-            // should be description for that segment
-            // const targetDescription = descriptions.find(d => d.target_id && d.target_id.segment_id === seg && d.target_kind === 'mesh' && d.target_id.segmentation_id === segmentationId);
-            // const label = targetDescription?.name ? `<b>${targetDescription.name}</b>` : ||||||;
             const label = `${segmentationId} | Segment ${seg}`;
 
             const detail = this.entryData.metadata.value!.getSufficientMeshDetail(segmentationId, timeframeIndex, seg, DEFAULT_MESH_DETAIL);
@@ -153,7 +140,6 @@ export class VolsegMeshSegmentationData {
         const segmentsToShow = new Set(segmentIds);
 
         const visuals = this.entryData.findNodesByTags('mesh-segment-visual', segmentationId);
-        // debugger;
         for (const visual of visuals) {
             const theTag = visual.obj?.tags?.find(tag => tag.startsWith('segment-'));
             if (!theTag) continue;

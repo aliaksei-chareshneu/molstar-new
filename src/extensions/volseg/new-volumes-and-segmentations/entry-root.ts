@@ -332,7 +332,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             // wrong, should just filter if includes in segmentsFilenames
             const condition = cvsxFilesIndex.meshSegmentations;
             if (condition) {
-                debugger;
                 rawMeshSegmentations = new Array<[string, Uint8Array]>;
                 for (const meshSegmentation of condition) {
                     const targetData = zf.filter(z => {
@@ -387,8 +386,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
     }
 
     async getData(timeframeIndex: number, channelIdOrSegmentationId: string, kind: RawDataKind) {
-        // TODO: optimize if elif?
-        debugger;
         if (kind === 'volume') {
             const channelData = await this.cachedVolumeTimeframesData.get(timeframeIndex, channelIdOrSegmentationId, 'volume');
             return channelData.data;
@@ -737,7 +734,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
                 const shapePrimitiveData = new RawSegmentationData(
                     g.timeframeIndex, g.segmentationId, g.data
                 );
-                debugger;
                 // channelsData.push(rawChannelData);
                 this.cachedShapePrimitiveData.add(
                     shapePrimitiveData
@@ -747,11 +743,8 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
     }
 
     preloadMeshTimeframesDataFromFile() {
-        debugger;
         if (this.filesData!.meshSegmentations) {
-            debugger;
             for (const segmentationData of this.filesData!.meshSegmentations) {
-                debugger;
                 const segmentsData: RawMeshSegmentData[] = [];
                 const rawData = segmentationData.data;
                 for (const [filename, d] of rawData) {
@@ -950,7 +943,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
     // }
 
     async actionSetOpacity(opacity: number, segmentationId: string, kind: 'lattice' | 'mesh' | 'primitive') {
-        debugger;
         // if (opacity === this.getStateNode().obj?.data.segmentOpacity) return;
         if (kind === 'lattice') this.latticeSegmentationData.updateOpacity(opacity, segmentationId);
         else if (kind === 'mesh') this.meshSegmentationData.updateOpacity(opacity, segmentationId);
@@ -1077,7 +1069,7 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             // segment will have name
             // it may not have labels
             if (segmentName) onHoverLabel = onHoverLabel + '<hr class="msp-highlight-info-hr"/>' + '<b>' + segmentName + '</b>';
-            if (annotLabels && annotLabels.length > 0) onHoverLabel = onHoverLabel + '<hr class="msp-highlight-info-hr"/>' + annotLabels.filter(isDefined).join('<br/>')
+            if (annotLabels && annotLabels.length > 0) onHoverLabel = onHoverLabel + '<hr class="msp-highlight-info-hr"/>' + annotLabels.filter(isDefined).join('<br/>');
             // return '<hr class="msp-highlight-info-hr"/>' + '<b>' + segmentName + '</b>' + '<hr class="msp-highlight-info-hr"/>' + annotLabels.filter(isDefined).join('<br/>');
             if (onHoverLabel !== '') return onHoverLabel; else return;
         }
@@ -1088,8 +1080,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             return loci.volume.label;
         } else if (ShapeGroup.isLoci(loci)) {
             const sourceData = loci.shape.sourceData;
-            debugger;
-            // as any?
             if (isMeshlistData(sourceData as any)) {
                 const meshData = (loci.shape.sourceData ?? {}) as MeshlistData;
                 return meshData.segmentationId!;
