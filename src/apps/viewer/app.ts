@@ -23,7 +23,7 @@ import { PDBeStructureQualityReport } from '../../extensions/pdbe';
 import { RCSBValidationReport } from '../../extensions/rcsb';
 import { AssemblySymmetry, AssemblySymmetryConfig } from '../../extensions/assembly-symmetry';
 import { SbNcbrPartialCharges, SbNcbrPartialChargesPreset, SbNcbrPartialChargesPropertyProvider, SbNcbrTunnels } from '../../extensions/sb-ncbr';
-import { NewVolseg, NewVolsegVolumeServerConfig } from '../../extensions/volseg/new-volumes-and-segmentations';
+import { NewVolseg, NewVolsegVolumeServerConfig } from '../../extensions/volseg/volumes-and-segmentations';
 import { loadCVSXFromAnything } from '../../extensions/volseg/cvsx-extension';
 import { CVSXSpec } from '../../extensions/volseg/cvsx-extension/behaviour';
 import { VolsegVolumeServerConfig } from '../../extensions/volumes-and-segmentations';

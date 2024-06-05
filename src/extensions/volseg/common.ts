@@ -4,10 +4,10 @@ import { setSubtreeVisibility } from '../../mol-plugin/behavior/static/state';
 import { PluginContext } from '../../mol-plugin/context';
 import { Asset } from '../../mol-util/assets';
 import { Choice } from '../../mol-util/param-choice';
-import { VolsegEntryData } from './new-volumes-and-segmentations/entry-root';
-import { SEGMENT_VISUAL_TAG } from './new-volumes-and-segmentations/entry-segmentation';
-import { DescriptionData, ParsedSegmentKey } from './new-volumes-and-segmentations/volseg-api/data';
-import { createSegmentKey, parseSegmentKey } from './new-volumes-and-segmentations/volseg-api/utils';
+import { VolsegEntryData } from './volumes-and-segmentations/entry-root';
+import { SEGMENT_VISUAL_TAG } from './volumes-and-segmentations/entry-segmentation';
+import { DescriptionData, ParsedSegmentKey } from './volumes-and-segmentations/volseg-api/data';
+import { createSegmentKey, parseSegmentKey } from './volumes-and-segmentations/volseg-api/utils';
 
 export async function parseCVSXJSON(rawFile: [string, Uint8Array], plugin: PluginContext) {
     const [fn, filedata] = rawFile;

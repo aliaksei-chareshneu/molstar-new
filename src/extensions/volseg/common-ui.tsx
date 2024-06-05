@@ -1,15 +1,15 @@
 import { Button, ExpandGroup, IconButton, TextInput } from '../../mol-plugin-ui/controls/common';
 import { sleep } from '../../mol-util/sleep';
 import { actionSelectSegment, actionToggleAllFilteredSegments, actionToggleSegment } from './common';
-import { WaitingButton } from './new-volumes-and-segmentations/ui';
-import { createSegmentKey, parseSegmentKey } from './new-volumes-and-segmentations/volseg-api/utils';
+import { WaitingButton } from './volumes-and-segmentations/ui';
+import { createSegmentKey, parseSegmentKey } from './volumes-and-segmentations/volseg-api/utils';
 import * as Icons from '../../mol-plugin-ui/controls/icons';
 import { useBehavior } from '../../mol-plugin-ui/hooks/use-behavior';
-import { VolsegEntryData } from './new-volumes-and-segmentations/entry-root';
+import { VolsegEntryData } from './volumes-and-segmentations/entry-root';
 import Markdown from 'react-markdown';
 import { capitalize } from '../../mol-util/string';
 import { useState } from 'react';
-import { DescriptionData, DetailsText, ExternalReference } from './new-volumes-and-segmentations/volseg-api/data';
+import { DescriptionData, DetailsText, ExternalReference } from './volumes-and-segmentations/volseg-api/data';
 
 export function DescriptionTextUI({ descriptionText: d }: { descriptionText: DetailsText }) {
     if (d.format === 'markdown') {

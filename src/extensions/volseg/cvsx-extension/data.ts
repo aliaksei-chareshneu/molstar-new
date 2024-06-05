@@ -1,7 +1,7 @@
 
 import { PluginContext } from '../../../mol-plugin/context';
 import { Source, parseCVSXJSON } from '../common';
-import { AnnotationMetadata, GridMetadata, ShapePrimitiveData } from '../new-volumes-and-segmentations/volseg-api/data';
+import { AnnotationMetadata, GridMetadata, ShapePrimitiveData } from '../volumes-and-segmentations/volseg-api/data';
 
 export interface CVSXFilesData {
     volumes?: CVSXVolumeData[]
