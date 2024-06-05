@@ -138,7 +138,7 @@ export function DescriptionsList({ model, targetSegmentationId, targetKind }: { 
                 }
                 )}
             </div>
-        </>}</>;
+        </div>}</>;
 }
 
 export function SelectedSegmentDescription({ model, targetSegmentationId, targetKind }: { model: VolsegEntryData, targetSegmentationId: string, targetKind: 'lattice' | 'mesh' | 'primitive' }) {
