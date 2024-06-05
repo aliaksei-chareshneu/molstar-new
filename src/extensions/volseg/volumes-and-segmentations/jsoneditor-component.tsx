@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2018-2024 mol* contributors, licensed under MIT, See LICENSE file for more info.
+ *
+ * @author Aliaksei Chareshneu <chareshneu.tech@gmail.com>
+ */
+
 import React, { useEffect, useRef } from 'react';
 import JSONEditor, { JSONEditorOptions } from 'jsoneditor';
 import 'jsoneditor/dist/jsoneditor.css';

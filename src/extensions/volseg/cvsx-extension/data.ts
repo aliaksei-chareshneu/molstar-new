@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2018-2024 mol* contributors, licensed under MIT, See LICENSE file for more info.
+ *
+ * @author Aliaksei Chareshneu <chareshneu.tech@gmail.com>
+ */
 
 import { PluginContext } from '../../../mol-plugin/context';
 import { Source, parseCVSXJSON } from '../common';

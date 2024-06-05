@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2018-2024 mol* contributors, licensed under MIT, See LICENSE file for more info.
+ *
+ * @author Aliaksei Chareshneu <chareshneu.tech@gmail.com>
+ */
+
 import { Volume } from '../../mol-model/volume';
 import { StateTransforms } from '../../mol-plugin-state/transforms';
 import { setSubtreeVisibility } from '../../mol-plugin/behavior/static/state';

@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2018-2024 mol* contributors, licensed under MIT, See LICENSE file for more info.
+ *
+ * @author Aliaksei Chareshneu <chareshneu.tech@gmail.com>
+ */
+
 import { Button, ExpandGroup, IconButton, TextInput } from '../../mol-plugin-ui/controls/common';
 import { sleep } from '../../mol-util/sleep';
 import { actionSelectSegment, actionToggleAllFilteredSegments, actionToggleSegment } from './common';

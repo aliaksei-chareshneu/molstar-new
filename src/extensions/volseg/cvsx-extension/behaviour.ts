@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2018-2024 mol* contributors, licensed under MIT, See LICENSE file for more info.
+ *
+ * @author Aliaksei Chareshneu <chareshneu.tech@gmail.com>
+ */
+
 import { DataFormatProvider } from '../../../mol-plugin-state/formats/provider';
 import { PluginBehavior } from '../../../mol-plugin/behavior';
 import { ParamDefinition } from '../../../mol-util/param-definition';

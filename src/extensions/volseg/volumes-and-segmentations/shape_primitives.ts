@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2018-2024 mol* contributors, licensed under MIT, See LICENSE file for more info.
+ *
+ * @author Aliaksei Chareshneu <chareshneu.tech@gmail.com>
+ */
+
 // import { StateTransformer } from '../../mol-state';
 import { PluginStateObject } from '../../../mol-plugin-state/objects';
 import { ParamDefinition as PD } from '../../../mol-util/param-definition';
