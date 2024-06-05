@@ -148,8 +148,6 @@ export class MetadataWrapper {
     }
 
     get allSegmentIds() {
-        // return this.allSegments.map(segment => segment.id);
-        // TODO: Segment ids should be unique
         return this.allAnnotations?.map(annotation => annotation.segment_id);
     }
 

@@ -788,7 +788,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
     }
 
     async updateProjectData(timeframeIndex: number) {
-        // TODO: add meshes here as well and to state hierarchy mirror?
         this.changeCurrentTimeframe(timeframeIndex);
         const volumes = this.state.hierarchy.value!.volumes;
         const segmenations = this.state.hierarchy.value!.segmentations;
@@ -807,8 +806,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
         for (const s of segmenations) {
             const projectSegmentationDataTransform = s.transform.ref;
             const oldParams: ProjectLatticeSegmentationDataParamsValues = s.transform.params;
-            // TODO: here get descriptions for segmentation and timeframe
-            // and set segmentLabels
             const descriptionsForLattice = this.metadata.value!.getDescriptions(
                 oldParams.segmentationId,
                 'lattice',
@@ -826,15 +823,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
         for (const s of geometricSegmentations) {
             const transform = s.transform.ref;
             const oldParams: ProjectGeometricSegmentationDataParamsValues = s.transform.params;
-            // TODO: here get descriptions for segmentation and timeframe
-            // and set segmentLabels
-            // const descriptionsForLattice = this.metadata.value!.getAllDescriptionsForSegmentationAndTimeframe(
-            //     oldParams.segmentationId,
-            //     'lattice',
-            //     this.currentTimeframe.value
-            // );
-            // const segmentLabels = getSegmentLabelsFromDescriptions(descriptionsForLattice);
-            // ;
             const newParams: ProjectGeometricSegmentationDataParamsValues = {
                 ...oldParams,
                 // segmentLabels: segmentLabels,
@@ -848,18 +836,11 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             const oldParams: ProjectMeshSegmentationDataParamsValues = m.transform.params;
             const newParams: ProjectMeshSegmentationDataParamsValues = {
                 ...oldParams,
-                // segmentLabels: segmentLabels,
                 timeframeIndex: timeframeIndex
             };
             await this.plugin.state.updateTransform(this.plugin.state.data, transform, newParams, 'Project Data Transform');
         }
     }
-
-    // async loadSegmentations() {
-    //     await this.latticeSegmentationData.loadSegmentation();
-    //     await this.meshSegmentationData.loadSegmentation();
-    //     await this.actionShowSegments(this.metadata.value!.allSegmentIds);
-    // }
 
     changeCurrentTimeframe(index: number) {
         this.currentTimeframe.next(index);
