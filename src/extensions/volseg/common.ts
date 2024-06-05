@@ -19,55 +19,18 @@ export async function parseCVSXJSON(rawFile: [string, Uint8Array], plugin: Plugi
     return parsedData;
 }
 
-// export async function actionToggleAllSegments(model: VolsegEntryData, segmentationId: string, kind: 'lattice' | 'mesh' | 'primitive') {
-//     const currentTimeframe = model.currentTimeframe.value;
-//     const current = model.currentState.value.visibleSegments.map(seg => seg.segmentKey);
-//     const currentForThisSegmentation = current.filter(c =>
-//         parseSegmentKey(c).segmentationId === segmentationId &&
-//         parseSegmentKey(c).kind === kind
-//     );
-//     const currentForOtherSegmentations = current.filter(item => currentForThisSegmentation.indexOf(item) < 0);
-//     if (currentForThisSegmentation.length !== model.metadata.value!.getAllSegmentAnotationsForSegmentationAndTimeframe(segmentationId, kind, currentTimeframe).length) {
-//         const allSegmentKeysFromSegmentation = model.metadata.value!.getAllSegmentAnotationsForSegmentationAndTimeframe(segmentationId, kind, currentTimeframe).map(a =>
-//             createSegmentKey(a.segment_id, a.segmentation_id, a.segment_kind)
-//         );
-//         const allSegmentKeys = [...allSegmentKeysFromSegmentation, ...currentForOtherSegmentations];
-//         await actionShowSegments(allSegmentKeys, model);
-//     } else {
-//         await actionShowSegments(currentForOtherSegmentations, model);
-//     }
-// }
-
-
-
 export async function actionToggleAllFilteredSegments(model: VolsegEntryData, segmentationId: string, kind: 'lattice' | 'mesh' | 'primitive', filteredDescriptions: DescriptionData[]) {
-    // const currentTimeframe = model.currentTimeframe.value;
-    // This is currently visible
     const current = model.currentState.value.visibleSegments.map(seg => seg.segmentKey);
-    // this is currently visible for this segmentation
     const currentForThisSegmentation = current.filter(c =>
         parseSegmentKey(c).segmentationId === segmentationId &&
         parseSegmentKey(c).kind === kind
     );
-    // const currentForThisSegmentation = filteredDescriptions;
-    // this is currently visible for other segmentations
     const currentForOtherSegmentations = current.filter(item => currentForThisSegmentation.indexOf(item) < 0);
-    // length of currently visible for this segmentation !== number of all segments for this segmentation
-
-    // This checks if
-    // if (currentForThisSegmentation.length !== model.metadata.value!.getAllSegmentAnotationsForSegmentationAndTimeframe(segmentationId, kind, currentTimeframe).length) {
     const allFilteredSegmentKeys = filteredDescriptions.map(d => {
-        // there are three types that are acceptable
-        // should add check that this is not entry
         if (d.target_kind !== 'entry') {
             return createSegmentKey(d.target_id!.segment_id, d.target_id!.segmentation_id, d.target_kind);
         }
     }).filter(Boolean);
-    // const allSegmentKeysFromSegmentation = model.metadata.value!.getAllDescriptionsForSegmentationAndTimeframe(segmentationId, kind, currentTimeframe).map(d => {
-    //     if (d.target_kind !== 'entry') {
-    //         return createSegmentKey(d.target_id!.segment_id, d.target_id!.segmentation_id, d.target_kind);
-    //     }
-    // }).filter(Boolean);
     if (currentForThisSegmentation.length !== filteredDescriptions.length) {
 
         const allSegmentKeys = [...allFilteredSegmentKeys, ...currentForOtherSegmentations];
@@ -83,15 +46,12 @@ export async function actionShowSegments(segmentKeys: string[], model: VolsegEnt
     const allExistingGeometricSegmentationIds = model.metadata.value!.raw.grid.geometric_segmentation!.segmentation_ids;
     if (segmentKeys.length === 0) {
         for (const id of allExistingLatticeSegmentationIds) {
-            // await model.latticeSegmentationData.showSegments([], id);
             await showSegments([], id, 'lattice', model);
         }
         for (const id of allExistingMeshSegmentationIds) {
-            // await model.meshSegmentationData.showSegments([], id);
             await showSegments([], id, 'mesh', model);
         }
         for (const id of allExistingGeometricSegmentationIds) {
-            // await model.geometricSegmentationData.showSegments([], id);
             await showSegments([], id, 'primitive', model);
         }
     }
@@ -102,7 +62,7 @@ export async function actionShowSegments(segmentKeys: string[], model: VolsegEnt
     _actionShowSegments(parsedSegmentKeys, allExistingLatticeSegmentationIds, 'lattice', model);
     // MESHES PART
     _actionShowSegments(parsedSegmentKeys, allExistingMeshSegmentationIds, 'mesh', model);
-    // GEOMETRIC SEGMENTATION PAR
+    // GEOMETRIC SEGMENTATION PART
     _actionShowSegments(parsedSegmentKeys, allExistingGeometricSegmentationIds, 'primitive', model);
 
     await model.updateStateNode({ visibleSegments: segmentKeys.map(s => ({ segmentKey: s })) });
@@ -110,7 +70,6 @@ export async function actionShowSegments(segmentKeys: string[], model: VolsegEnt
 
 export async function _actionShowSegments(parsedSegmentKeys: ParsedSegmentKey[], existingSegmentationIds: string[], kind: 'mesh' | 'lattice' | 'primitive', model: VolsegEntryData) {
     const segmentKeys = parsedSegmentKeys.filter(k => k.kind === kind);
-    // const segmentIds = segmentKeys.map(k => k.segmentId);
     const SegmentationIdsToSegmentIds = new Map<string, number[]>;
     for (const key of segmentKeys) {
         if (!SegmentationIdsToSegmentIds.has(key.segmentationId)) {
@@ -128,12 +87,7 @@ export async function _actionShowSegments(parsedSegmentKeys: ParsedSegmentKey[],
     }
     const promises: Promise<void>[] = [];
     SegmentationIdsToSegmentIds.forEach((value, key) => {
-        // TODO: refactor these three showSegments - they seem to not use any submodel parameters
-        // Take three
         promises.push(showSegments(value, key, kind, model));
-        // if (kind === 'lattice') promises.push(showSegments(value, key, 'lattice'));
-        // else if (kind === 'mesh') promises.push(showSegments(value, key));
-        // else if (kind === 'primitive') promises.push(showSegments(value, key));
     });
     await Promise.all(promises);
 }
@@ -148,7 +102,6 @@ export function findNodesByTags(plugin: PluginContext, ...tags: string[]) {
 }
 
 export function findNodesByRef(plugin: PluginContext, ref: string) {
-    // return this.plugin.state.data.selectQ(q => q.byRef(ref).subtree())[0];
     return plugin.state.data.selectQ(q => q.byRef(ref).subtree())[0];
 }
 
