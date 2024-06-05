@@ -378,7 +378,8 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             geometricSegmentations: await cvsxData.geometricSegmentationDataFromRaw(rawGeometricSegmentations),
             annotations: parsedAnnotationMetadata,
             metadata: parsedGridMetadata,
-            query: parsedQueryJSON
+            query: parsedQueryJSON,
+            index: cvsxFilesIndex
         };
         const result = new VolsegEntryData(plugin, params, filesData);
         await result.initializeFromFile(metadata);

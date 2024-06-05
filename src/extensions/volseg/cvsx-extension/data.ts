@@ -10,7 +10,8 @@ export interface CVSXFilesData {
     meshSegmentations?: CVSXMeshSegmentationData[],
     annotations?: AnnotationMetadata,
     metadata?: GridMetadata,
-    query: QueryArgs
+    query: QueryArgs,
+    index: CVSXFilesIndex
 };
 
 export interface CVSXFileInfo {
@@ -39,11 +40,11 @@ export interface GeometricSegmentationFileInfo extends SegmentationFileInfo {
 }
 
 export interface CVSXFilesIndex {
-    // # file name to info mapping
+    // file name to info mapping
     volumes: { [filename: string]: VolumeFileInfo }
-    // # file name to info mapping
+    // file name to info mapping
     latticeSegmentations?: { [filename: string]: LatticeSegmentationFileInfo }
-    // # file name to info mapping
+    // file name to info mapping
     geometricSegmentations?: { [filename: string]: GeometricSegmentationFileInfo }
     meshSegmentations?: MeshSegmentationFilesInfo[]
     // file names
@@ -95,7 +96,6 @@ export class CVSXData {
     }
 
     meshSegmentationDataFromRaw(rawData?: [string, Uint8Array][]) {
-        // no raw data here
         const data: CVSXMeshSegmentationData[] = [];
         const meshesInfo = this.cvsxFilesIndex.meshSegmentations;
         if (!rawData || !meshesInfo) return undefined;

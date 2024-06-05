@@ -14,16 +14,3 @@ export const CVSXFormatProvider: DataFormatProvider<{}, StateObjectRef<any>, any
         return loadCVSXFromAnything(plugin, data);
     },
 });
-
-
-
-// export const MVSXFormatProvider: DataFormatProvider<{}, StateObjectRef<Mvs>, any> = DataFormatProvider({
-//     label: 'MVSX',
-//     description: 'MVSX',
-//     category: 'Miscellaneous',
-//     binaryExtensions: ['mvsx'],
-//     parse: async (plugin, data) => {
-//         return plugin.state.data.build().to(data).apply(ParseMVSX).commit();
-//     },
-//     visuals: MVSJFormatProvider.visuals,
-// });
