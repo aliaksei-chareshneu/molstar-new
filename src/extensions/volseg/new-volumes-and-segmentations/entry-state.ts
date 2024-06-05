@@ -14,14 +14,7 @@ export type VolumeType = Choice.Values<typeof VolumeTypeChoice>
 
 
 export const VolsegStateParams = {
-    // segmentOpacity: PD.Numeric(1, { min: 0, max: 1, step: 0.05 }),
-    // segmentKey: `${kind}:${segmentationId}:${segmentId}`
     selectedSegment: PD.Text(''),
-    // visibleSegments: PD.ObjectList({
-    //     segmentId: PD.Numeric(0),
-    //     segmentationId: PD.Text(''),
-    //     kind: PD.Select('lattice', [['lattice', 'lattice'], ['mesh', 'mesh'], ['primitive', 'primitive']])
-    // }, k => `${k.segmentId}:${k.segmentationId}:${k.kind}`),
     visibleSegments: PD.ObjectList({
         segmentKey: PD.Text('') }, k => k.segmentKey
     ),

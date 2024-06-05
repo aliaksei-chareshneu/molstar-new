@@ -46,7 +46,7 @@ export class VolsegGeometricSegmentationData {
                 .apply(CreateShapePrimitiveProvider, { segmentId: primitiveData.id, descriptions: descriptions, segmentAnnotations: segmentAnnotations, segmentationId: segmentationId })
                 // TODO: shape representation 3d could have no alpha
                 // TODO: get alpha from transform somehow
-                .apply(StateTransforms.Representation.ShapeRepresentation3D, { alpha: 0.5 }, { tags: ['geometric-segmentation-visual', segmentationId, `segment-${primitiveData.id}`] })
+                .apply(StateTransforms.Representation.ShapeRepresentation3D, { alpha: 0.5 }, { tags: ['geometric-segmentation-visual', segmentationId, `segment-${primitiveData.id}`] });
         }
         await update.commit();
     }

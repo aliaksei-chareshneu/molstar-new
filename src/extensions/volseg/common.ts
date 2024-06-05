@@ -187,7 +187,6 @@ async function showSegments(segmentIds: number[], segmentationId: string, kind: 
         const segmentsToShow = new Set(segmentIds);
 
         const visuals = findNodesByTags(model.plugin, 'mesh-segment-visual', segmentationId);
-        // debugger;
         for (const visual of visuals) {
             const theTag = visual.obj?.tags?.find(tag => tag.startsWith('segment-'));
             if (!theTag) continue;

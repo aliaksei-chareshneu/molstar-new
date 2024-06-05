@@ -283,7 +283,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
         const metadata = await this.api.getMetadata(this.source, this.entryId);
         this.metadata.next(new MetadataWrapper(metadata));
         this.pdbs = await ExternalAPIs.getPdbIdsForEmdbEntry(this.metadata.value!.raw.annotation?.entry_id.source_db_id ?? this.entryId);
-        // TODO use Asset?
         await this.init();
     }
 
@@ -298,6 +297,43 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
         return result;
     }
 
+    private static getRawLatticeSegmentationsFromCSVX(cvsxFilesIndex: CVSXFilesIndex, zf: [string, Uint8Array][]) {
+        let rawLatticeSegmentations;
+        if (cvsxFilesIndex.latticeSegmentations) {
+            const condition = cvsxFilesIndex.latticeSegmentations;
+            rawLatticeSegmentations = zf.filter(z => condition.hasOwnProperty(z[0]));
+        }
+        return rawLatticeSegmentations;
+    };
+
+    private static getRawGeometricSegmentationsFromCVSX(cvsxFilesIndex: CVSXFilesIndex, zf: [string, Uint8Array][]) {
+        let rawGeometricSegmentations;
+        if (cvsxFilesIndex.geometricSegmentations) {
+            const condition = cvsxFilesIndex.geometricSegmentations;
+            rawGeometricSegmentations = zf.filter(z => condition.hasOwnProperty(z[0]));
+        }
+        return rawGeometricSegmentations;
+    }
+
+    private static getRawMeshSegmentationsFromCSVX(cvsxFilesIndex: CVSXFilesIndex, zf: [string, Uint8Array][]) {
+        let rawMeshSegmentations;
+        if (cvsxFilesIndex.meshSegmentations) {
+            const condition = cvsxFilesIndex.meshSegmentations;
+            if (condition) {
+                rawMeshSegmentations = new Array<[string, Uint8Array]>;
+                for (const meshSegmentation of condition) {
+                    const targetData = zf.filter(z => {
+                        const filenames = meshSegmentation.segmentsFilenames;
+                        if (filenames.includes(z[0])) {
+                            return z;
+                        }
+                    });
+                    rawMeshSegmentations = rawMeshSegmentations.concat(targetData);
+                }
+            };
+        }
+        return rawMeshSegmentations;
+    }
     static async createFromFile(plugin: PluginContext, file: Uint8Array, runtimeCtx: RuntimeContext) {
         const zippedFiles: { [path: string]: Uint8Array } = await unzip(runtimeCtx, file.buffer) as typeof zippedFiles;
         const zf = Object.entries(zippedFiles);
@@ -314,38 +350,15 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
         const metadataJSONEntry = zf.find(z => z[0] === cvsxFilesIndex.metadata);
         const annotationJSONEntry = zf.find(z => z[0] === cvsxFilesIndex.annotations);
 
-        //
         const rawVolumes = zf.filter(z => cvsxFilesIndex.volumes.hasOwnProperty(z[0]));
 
 
-        // TODO: refactor - separate function
-        let rawLatticeSegmentations, rawMeshSegmentations, rawGeometricSegmentations;
-        if (cvsxFilesIndex.latticeSegmentations) {
-            const condition = cvsxFilesIndex.latticeSegmentations;
-            rawLatticeSegmentations = zf.filter(z => condition.hasOwnProperty(z[0]));
-        }
-        if (cvsxFilesIndex.geometricSegmentations) {
-            const condition = cvsxFilesIndex.geometricSegmentations;
-            rawGeometricSegmentations = zf.filter(z => condition.hasOwnProperty(z[0]));
-        }
-        if (cvsxFilesIndex.meshSegmentations) {
-            // wrong, should just filter if includes in segmentsFilenames
-            const condition = cvsxFilesIndex.meshSegmentations;
-            if (condition) {
-                rawMeshSegmentations = new Array<[string, Uint8Array]>;
-                for (const meshSegmentation of condition) {
-                    const targetData = zf.filter(z => {
-                        const filenames = meshSegmentation.segmentsFilenames;
-                        if (filenames.includes(z[0])) {
-                            return z;
-                        }
-                    });
-                    rawMeshSegmentations = rawMeshSegmentations.concat(targetData);
-                }
-            };
-        }
+        const rawLatticeSegmentations = this.getRawLatticeSegmentationsFromCSVX(cvsxFilesIndex, zf);
+        const rawMeshSegmentations = this.getRawMeshSegmentationsFromCSVX(cvsxFilesIndex, zf);
+        const rawGeometricSegmentations = this.getRawLatticeSegmentationsFromCSVX(cvsxFilesIndex, zf);
+
         if (!rawQueryJSON || !metadataJSONEntry || !annotationJSONEntry) {
-            throw new Error('CVSX has wrong content, some components are missing');
+            throw new Error('CVSX has wrong content, some obligatory components are missing');
         }
 
         // do parsing
@@ -460,11 +473,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
     async updateMetadata() {
         const metadata = await this.api.getMetadata(this.source, this.entryId);
         this.metadata.next(new MetadataWrapper(metadata));
-        // trigger update of state to re-render UI
-        // const params = this.getStateNode().obj?.data;
-        // if (params) {
-        //     this.currentState.next(params);
-        // }
     }
 
     async register(ref: string) {
@@ -526,7 +534,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
         });
 
         this.subscribeObservable(
-            // TODO: get segment Id, segmentation id and segment kind from here
             this.highlightRequest.pipe(throttleTime(50, undefined, { leading: true, trailing: true })),
             async segmentKey => await this.highlightSegment(segmentKey)
         );
@@ -556,21 +563,10 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
 
     async editDescriptions(descriptionData: DescriptionData[]) {
         await this.api.editDescriptionsUrl(this.source, this.entryId, descriptionData);
-        // TODO: add to metadata
-        // or fetch it again?
-        // TODO: trigger re-rendering of UI
     }
 
     async editSegmentAnnotations(segmentAnnotationData: SegmentAnnotationData[]) {
         await this.api.editSegmentAnnotationsUrl(this.source, this.entryId, segmentAnnotationData);
-    }
-
-    async loadVolume() {
-        // const result = await this.volumeData.loadVolume();
-        // if (result) {
-        //     const isovalue = result.isovalue.kind === 'relative' ? result.isovalue.relativeValue : result.isovalue.absoluteValue;
-        //     await this.updateStateNode({ volumeIsovalueKind: result.isovalue.kind, volumeIsovalueValue: isovalue });
-        // }
     }
 
     private async _resolveBinaryUrl(urlString: string) {
@@ -589,7 +585,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
 
     async _loadRawMeshSegmentationData(timeframe: number, segmentationId: string) {
         const segmentsData: RawMeshSegmentData[] = [];
-        // need to have segmentsToCreate for given segmentationId and timeframe index
         const segmentsToCreate = this.metadata.value!.getMeshSegmentIdsForSegmentationIdAndTimeframe(segmentationId, timeframe);
         for (const seg of segmentsToCreate) {
             const detail = this.metadata.value!.getSufficientMeshDetail(segmentationId, timeframe, seg, DEFAULT_MESH_DETAIL);
@@ -610,7 +605,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
     }
 
     async _loadGeometricSegmentationData(timeframe: number, segmentationId: string) {
-        // const primitivesData: ShapePrimitiveData
         const url = this.api.geometricSegmentationUrl(this.source, this.entryId, segmentationId, timeframe);
         const primitivesData = await this._resolveStringUrl(url);
         const parsedData: ShapePrimitiveData = JSON.parse(primitivesData);
@@ -619,13 +613,10 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             segmentationId,
             parsedData
         );
-        // return parsedData;
     }
 
     async _loadRawChannelData(timeframe: number, channelId: string) {
         const urlString = this.api.volumeUrl(this.source, this.entryId, timeframe, channelId, BOX, MAX_VOXELS);
-        // const url = Asset.getUrlAsset(this.plugin.managers.asset, urlString);
-        // const asset = this.plugin.managers.asset.resolve(url, 'binary');
         const data = await this._resolveBinaryUrl(urlString);
         return new RawChannelData(
             timeframe,
@@ -645,9 +636,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
     }
 
     private async loadRawChannelsData(timeInfo: TimeInfo, channelIds: string[]) {
-        // TODO: make it run in parallel without await
-        // TODO: or to run it in ctx?
-
         const start = timeInfo.start;
         const end = timeInfo.end;
         for (let i = start; i <= end; i++) {
@@ -661,15 +649,12 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
     }
 
     private async loadRawLatticeSegmentationData(timeInfoMapping: { [segmentation_id: string]: TimeInfo }, segmentationIds: string[]) {
-        // TODO: make it run in parallel without await
-        // TODO: or to run it in ctx?
         for (const segmentationId of segmentationIds) {
             const timeInfo = timeInfoMapping[segmentationId];
             const start = timeInfo.start;
             const end = timeInfo.end;
             for (let i = start; i <= end; i++) {
                 const rawLatticeSegmentationData = await this._loadRawLatticeSegmentationData(i, segmentationId);
-                // channelsData.push(rawChannelData);
                 this.cachedSegmentationTimeframesData.add(
                     rawLatticeSegmentationData
                 );
@@ -911,44 +896,10 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
         this.highlightRequest.next(segmentKey);
     }
 
-    // async actionToggleSegment(segmentKey: string) {
-    //     const current = this.currentState.value.visibleSegments.map(seg => seg.segmentKey);
-    //     if (current.includes(segmentKey)) {
-    //         await this.actionShowSegments(current.filter(s => s !== segmentKey));
-    //     } else {
-    //         await this.actionShowSegments([...current, segmentKey]);
-    //     }
-    // }
-
-    // async actionToggleAllSegments() {
-    //     const currentTimeframe = this.currentTimeframe.value;
-    //     const current = this.currentState.value.visibleSegments.map(seg => seg.segmentKey);
-    //     if (current.length !== this.metadata.value!.getAllAnnotationsForTimeframe(currentTimeframe).length) {
-    //         const allSegmentKeys = this.metadata.value!.getAllAnnotationsForTimeframe(currentTimeframe).map(a =>
-    //             createSegmentKey(a.segment_id, a.segmentation_id, a.segment_kind)
-    //         );
-    //         await this.actionShowSegments(allSegmentKeys);
-    //     } else {
-    //         await this.actionShowSegments([]);
-    //     }
-    // }
-
-    // async actionSelectSegment(segment?: number) {
-    // async actionSelectSegment(segmentKey?: string) {
-    //     if (segmentKey !== undefined && this.currentState.value.visibleSegments.find(s => s.segmentKey === segmentKey) === undefined) {
-    //         // first make the segment visible if it is not
-    //         await this.actionToggleSegment(segmentKey);
-    //     }
-    //     await this.updateStateNode({ selectedSegment: segmentKey });
-    // }
-
     async actionSetOpacity(opacity: number, segmentationId: string, kind: 'lattice' | 'mesh' | 'primitive') {
-        // if (opacity === this.getStateNode().obj?.data.segmentOpacity) return;
         if (kind === 'lattice') this.latticeSegmentationData.updateOpacity(opacity, segmentationId);
         else if (kind === 'mesh') this.meshSegmentationData.updateOpacity(opacity, segmentationId);
-        // else if TODO: geometric segmentation
         else if (kind === 'primitive') this.geometricSegmentationData.updateOpacity(opacity, segmentationId);
-        // await this.updateStateNode({ segmentOpacity: opacity });
     }
 
     async actionShowFittedModel(pdbIds: string[]) {
@@ -959,7 +910,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
     async actionSetVolumeVisual(type: 'isosurface' | 'direct-volume' | 'off', channelId: string, transform: StateTransform) {
         await this.volumeData.setVolumeVisual(type, channelId, transform);
         const currentChannelsData = this.currentState.value.channelsData;
-        // it needs to find object corresponding to that channel volume node and update only it!
         const channelToBeUpdated = currentChannelsData.filter(c => c.channelId === channelId)[0];
         channelToBeUpdated.volumeType = type;
         await this.updateStateNode({ channelsData: [...currentChannelsData] });
@@ -968,7 +918,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
     async actionUpdateVolumeVisual(params: SimpleVolumeParamValues, channelId: string, transform: StateTransform) {
         await this.volumeData.updateVolumeVisual(params, channelId, transform);
         const currentChannelsData = this.currentState.value.channelsData;
-        // it needs to find object corresponding to that channel volume node and update only it!
         const channelToBeUpdated = currentChannelsData.filter(c => c.channelId === channelId)[0];
         channelToBeUpdated.volumeType = params.volumeType;
         channelToBeUpdated.volumeOpacity = params.opacity;
@@ -987,13 +936,11 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             } else if (kind === 'primitive') {
                 await this.geometricSegmentationData.highlightSegment(segmentId, segmentationId);
             }
-            // TODO: support primitive
         }
     }
 
     private async selectSegment(segmentKey: string) {
         this.plugin.managers.interactivity.lociSelects.deselectAll();
-        // TODO: parse segmentKey first
         const parsedSegmentKey = parseSegmentKey(segmentKey);
         if (parsedSegmentKey.kind === 'lattice') {
             await this.latticeSegmentationData.selectSegment(parsedSegmentKey.segmentId, parsedSegmentKey.segmentationId);
@@ -1003,9 +950,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
             await this.geometricSegmentationData.selectSegment(parsedSegmentKey.segmentId, parsedSegmentKey.segmentationId);
         }
 
-        // TODO: primitives
-        // await this.latticeSegmentationData.selectSegment(segment);
-        // await this.meshSegmentationData.selectSegment(segment);
         await this.highlightSegment();
     }
 
@@ -1038,39 +982,22 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
         }
     }
 
-    // Fix this
     private readonly labelProvider: LociLabelProvider = {
         label: (loci: Loci): string | undefined => {
             const segmentId = this.getSegmentIdFromLoci(loci);
             const segmentationId = this.getSegmentationIdFromLoci(loci);
             const segmentationKind = this.getSegmentationKindFromLoci(loci);
             if (segmentId === undefined || !segmentationId || !segmentationKind) return;
-            // const segmentKey = createSegmentKey(segmentId, segmentationId, segmentationKind);
             const descriptions = this.metadata.value!.getSegmentDescription(segmentId, segmentationId, segmentationKind);
             if (!descriptions) return;
 
-            // theoretically there can be multiple descriptions
-            // for each segment
-            // first try assuming there is a single one
-            // TODO: add label name or something
-            // description?.name
             const descriptionName = descriptions[0].name;
             const segmentName = descriptionName;
             const annotLabels = descriptions[0].external_references?.map(e => `${applyEllipsis(e.label ? e.label : '')} [${e.resource}:${e.accession}]`);
-            // TODO: try rendering multiple descriptions
-            // if (!annotLabels && !segmentName || annotLabels?.length === 0 && !segmentName || descriptions[0].is_hidden === true) return;
-            // if (annotLabels.length > MAX_ANNOTATIONS_IN_LABEL + 1) {
-            //     const nHidden = annotLabels.length - MAX_ANNOTATIONS_IN_LABEL;
-            //     annotLabels.length = MAX_ANNOTATIONS_IN_LABEL;
-            //     annotLabels.push(`(${nHidden} more annotations, click on the segment to see all)`);
-            // }
             if (descriptions[0].is_hidden === true) return;
             let onHoverLabel = '';
-            // segment will have name
-            // it may not have labels
             if (segmentName) onHoverLabel = onHoverLabel + '<hr class="msp-highlight-info-hr"/>' + '<b>' + segmentName + '</b>';
             if (annotLabels && annotLabels.length > 0) onHoverLabel = onHoverLabel + '<hr class="msp-highlight-info-hr"/>' + annotLabels.filter(isDefined).join('<br/>');
-            // return '<hr class="msp-highlight-info-hr"/>' + '<b>' + segmentName + '</b>' + '<hr class="msp-highlight-info-hr"/>' + annotLabels.filter(isDefined).join('<br/>');
             if (onHoverLabel !== '') return onHoverLabel; else return;
         }
     };
@@ -1094,13 +1021,10 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
         if (Volume.Segment.isLoci(loci)) {
             return 'lattice';
         } else if (ShapeGroup.isLoci(loci)) {
-            // return 'mesh';
             const sourceData = loci.shape.sourceData;
             if (isMeshlistData(sourceData as any)) {
-                // const meshData = (loci.shape.sourceData ?? {}) as MeshlistData;
                 return 'mesh';
             } else if (isShapePrimitiveParamsValues(sourceData as any)) {
-                // const shapePrimitiveParamsValues = (loci.shape.sourceData ?? {}) as CreateShapePrimitiveProviderParamsValues;
                 return 'primitive';
             }
         }
@@ -1119,7 +1043,6 @@ export class VolsegEntryData extends PluginBehavior.WithSubscribers<VolsegEntryP
                 if (meshData.ownerId === this.ref && meshData.segmentId !== undefined) {
                     return meshData.segmentId;
                 }
-                // TODO: check for ownerId? this would be entry root
             } else if (isShapePrimitiveParamsValues(sourceData as any)) {
                 const shapePrimitiveParamsValues = (loci.shape.sourceData ?? {}) as CreateShapePrimitiveProviderParamsValues;
                 return shapePrimitiveParamsValues.segmentId;
