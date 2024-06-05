@@ -49,45 +49,6 @@ export class VolsegVolumeData {
         this.entryData = rootData;
     }
 
-    async loadVolume() {
-        // const hasVolumes = this.entryData.metadata.value!.raw.grid.volumes.volume_downsamplings.length > 0;
-        // if (hasVolumes) {
-        //     const isoLevelPromise = ExternalAPIs.tryGetIsovalue(this.entryData.metadata.value!.raw.grid.general.source_db_id ?? this.entryData.entryId);
-        //     let group = this.entryData.findNodesByTags(GROUP_TAG)[0]?.transform.ref;
-        //     if (!group) {
-        //         const newGroupNode = await this.entryData.newUpdate().apply(CreateGroup, { label: 'Volume' }, { tags: [GROUP_TAG], state: { isCollapsed: true } }).commit();
-        //         group = newGroupNode.ref;
-        //     }
-        //     const url = this.entryData.api.volumeUrl(this.entryData.source, this.entryData.entryId, BOX, MAX_VOXELS);
-        //     const data = await this.entryData.newUpdate().to(group).apply(Download, { url, isBinary: true, label: `Volume Data: ${url}` }).commit();
-        //     const parsed = await this.entryData.plugin.dataFormats.get('dscif')!.parse(this.entryData.plugin, data);
-        //     const volumeNode: StateObjectSelector<PluginStateObject.Volume.Data> = parsed.volumes?.[0] ?? parsed.volume;
-        //     const volumeData = volumeNode.cell!.obj!.data;
-
-        //     const volumeType = VolsegStateParams.volumeType.defaultValue;
-        //     let isovalue = await isoLevelPromise;
-        //     if (!isovalue) {
-        //         const stats = volumeData.grid.stats;
-        //         const maxRelative = (stats.max - stats.mean) / stats.sigma;
-        //         if (maxRelative > 1) {
-        //             isovalue = { kind: 'relative', value: 1.0 };
-        //         } else {
-        //             isovalue = { kind: 'relative', value: maxRelative * 0.5 };
-        //         }
-        //     }
-
-        //     const adjustedIsovalue = Volume.adjustedIsoValue(volumeData, isovalue.value, isovalue.kind);
-        //     const visualParams = this.createVolumeVisualParams(volumeData, volumeType);
-        //     this.changeIsovalueInVolumeVisualParams(visualParams, adjustedIsovalue, volumeData.grid.stats);
-
-        //     await this.entryData.newUpdate()
-        //         .to(volumeNode)
-        //         .apply(StateTransforms.Representation.VolumeRepresentation3D, visualParams, { tags: [VOLUME_VISUAL_TAG], state: { isHidden: volumeType === 'off' } })
-        //         .commit();
-        //     return { isovalue: adjustedIsovalue };
-        // }
-    }
-
     async createVolumeGroup() {
         let group = this.entryData.findNodesByTags(GROUP_TAG)[0]?.transform.ref;
         if (!group) {
@@ -208,7 +169,6 @@ export class VolsegVolumeData {
             : Volume.IsoValue.absolute(volumeIsovalueValue);
     }
 
-    // TODO: fix volume type invalid slice
     private createVolumeVisualParams(volume: Volume, type: 'isosurface' | 'direct-volume' | 'off', color: Color): VolumeVisualParams {
         if (type === 'off') type = 'isosurface';
 
@@ -228,7 +188,6 @@ export class VolsegVolumeData {
                 });
                 return params;
             }
-            // }
         }
 
 

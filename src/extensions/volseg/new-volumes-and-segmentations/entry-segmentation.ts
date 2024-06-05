@@ -33,36 +33,6 @@ export class VolsegLatticeSegmentationData {
 
     constructor(rootData: VolsegEntryData) {
         this.entryData = rootData;
-        // this.colorMap = undefined;
-    }
-
-    async loadSegmentation() {
-        // const hasLattices = this.entryData.metadata.value!.raw.grid.segmentation_lattices.segmentation_ids.length > 0;
-        // if (hasLattices) {
-        //     const url = this.entryData.api.latticeUrl(this.entryData.source, this.entryData.entryId, 0, BOX, MAX_VOXELS);
-        //     let group = this.entryData.findNodesByTags(GROUP_TAG)[0]?.transform.ref;
-        //     if (!group) {
-        //         const newGroupNode = await this.entryData.newUpdate().apply(CreateGroup,
-        //             { label: 'Segmentation', description: 'Lattice' }, { tags: [GROUP_TAG], state: { isCollapsed: true } }).commit();
-        //         group = newGroupNode.ref;
-        //     }
-        //     const segmentLabels = this.entryData.metadata.value!.allSegments.map(seg => ({ id: seg.id, label: seg.biological_annotation.name ? `<b>${seg.biological_annotation.name}</b>` : '' }));
-        //     const volumeNode = await this.entryData.newUpdate().to(group)
-        //         .apply(Download, { url, isBinary: true, label: `Segmentation Data: ${url}` })
-        //         .apply(ParseCif)
-        //         .apply(VolumeFromSegmentationCif, { blockHeader: 'SEGMENTATION_DATA', segmentLabels: segmentLabels, ownerId: this.entryData.ref })
-        //         .commit();
-        //     const volumeData = volumeNode.data as Volume;
-        //     const segmentation = Volume.Segmentation.get(volumeData);
-        //     const segmentIds: number[] = Array.from(segmentation?.segments.keys() ?? []);
-        //     await this.entryData.newUpdate().to(volumeNode)
-        //         .apply(StateTransforms.Representation.VolumeRepresentation3D, createVolumeRepresentationParams(this.entryData.plugin, volumeData, {
-        //             type: 'segment',
-        //             typeParams: { tryUseGpu: VolsegGlobalStateData.getGlobalState(this.entryData.plugin)?.tryUseGpu },
-        //             color: 'volume-segment',
-        //             colorParams: { palette: this.createPalette(segmentIds) },
-        //         }), { tags: [SEGMENT_VISUAL_TAG] }).commit();
-        // }
     }
 
     async createSegmentationGroup() {
@@ -103,8 +73,6 @@ export class VolsegLatticeSegmentationData {
         }
     }
 
-    // should be aware of segmentations and segments in each segmentation
-    // should be called once
     private createColorMap() {
         const colorMapForAllSegmentations = new Map<string, any>();
         if (this.entryData.metadata.value!.allAnnotations) {
@@ -132,9 +100,7 @@ export class VolsegLatticeSegmentationData {
     async updateOpacity(opacity: number, segmentationId: string) {
         const s = this.entryData.findNodesByTags(SEGMENT_VISUAL_TAG, segmentationId)[0];
         const update = this.entryData.newUpdate();
-        // for (const s of reprs) {
         update.to(s).update(StateTransforms.Representation.VolumeRepresentation3D, p => { p.type.params.alpha = opacity; });
-        // }
         return await update.commit();
     }
     private makeLoci(segments: number[], segmentationId: string) {

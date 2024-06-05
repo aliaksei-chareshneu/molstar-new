@@ -15,10 +15,9 @@ async function updateJSON(jsonData: AnnotationMetadata, entryData: VolsegEntryDa
     await entryData.updateMetadata();
 }
 
-export const JSONEditorComponent: React.FC<JSONEditorComponentProps> = ({ jsonData, entryData }) => {
+export const JSONEditorComponent: React.FC<JSONEditorComponentProps> = ({ jsonData, entryData }: { jsonData: AnnotationMetadata, entryData: VolsegEntryData }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     let jsonEditor: JSONEditor | null = null;
-    // let jsonDataUpdated = jsonData;
     const jsonDataUpdated = useRef(jsonData);
     useEffect(() => {
         if (containerRef.current) {

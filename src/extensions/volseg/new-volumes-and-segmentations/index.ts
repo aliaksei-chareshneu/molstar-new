@@ -98,7 +98,6 @@ export const LoadVolseg = StateAction.build({
         await state.build().to(entryNode).apply(VolsegStateFromEntry, {}, { state: { isGhost: !DEBUGGING } }).commit();
         if (entryNode.data) {
             const entryData = entryNode.data;
-            // const currentTimeframe = entryData.currentTimeframe.value;
             const hasVolumes = entryNode.data.metadata.value!.raw.grid.volumes.volume_sampling_info.spatial_downsampling_levels.length > 0;
             if (hasVolumes) {
                 const group = await entryNode.data.volumeData.createVolumeGroup();
@@ -149,7 +148,6 @@ export const LoadVolseg = StateAction.build({
 
             const hasMeshes = entryNode.data.metadata.value!.raw.grid.segmentation_meshes;
             if (hasMeshes && hasMeshes.segmentation_ids.length > 0) {
-                // meshes should be rendered as segmentation sets similar to lattices
                 const group = await entryNode.data.meshSegmentationData.createMeshGroup();
                 const segmentationIds = hasMeshes.segmentation_ids;
                 for (const segmentationId of segmentationIds) {
@@ -166,8 +164,6 @@ export const LoadVolseg = StateAction.build({
 
 
             }
-            // for now for a single timeframe;
-            // await entryData.geometricSegmentationData.loadGeometricSegmentation(0);
             const hasGeometricSegmentation = entryData.metadata.value!.raw.grid.geometric_segmentation;
             if (hasGeometricSegmentation && hasGeometricSegmentation.segmentation_ids.length > 0) {
                 const group = await entryNode.data.geometricSegmentationData.createGeometricSegmentationGroup();
