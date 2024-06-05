@@ -18,7 +18,7 @@ import { PluginContext } from '../../../mol-plugin/context';
 import { StateObjectCell, StateSelection, StateTransform } from '../../../mol-state';
 import { shallowEqualObjects } from '../../../mol-util';
 import { ParamDefinition } from '../../../mol-util/param-definition';
-import { isMeshlistData, MeshlistData, VolsegMeshSegmentation } from '../new-meshes/mesh-extension';
+import { isMeshlistData, MeshlistData, VolsegMeshSegmentation } from '../meshes/mesh-extension';
 
 import { DEFAULT_VOLSEG_SERVER, VolumeApiV2 } from './volseg-api/api';
 import { AnnotationMetadata, DescriptionData, GridMetadata, Metadata, SegmentAnnotationData, ShapePrimitiveData, TimeInfo } from './volseg-api/data';

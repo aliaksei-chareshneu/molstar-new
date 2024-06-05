@@ -12,7 +12,7 @@ import { PluginContext } from '../../../mol-plugin/context';
 import { StateTransformer } from '../../../mol-state';
 import { Task } from '../../../mol-task';
 import { ParamDefinition } from '../../../mol-util/param-definition';
-import { MeshData, VolsegMeshData, VolsegMeshDataParams, VolsegMeshSegmentation } from '../new-meshes/mesh-extension';
+import { MeshData, VolsegMeshData, VolsegMeshDataParams, VolsegMeshSegmentation } from '../meshes/mesh-extension';
 
 import { RawMeshSegmentData, VolsegEntry, VolsegEntryData, createVolsegEntryParams } from './entry-root';
 import { VolsegState, VolsegStateParams, VOLSEG_STATE_FROM_ENTRY_TRANSFORMER_NAME } from './entry-state';

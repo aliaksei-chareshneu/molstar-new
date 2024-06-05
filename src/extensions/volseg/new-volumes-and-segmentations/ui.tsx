@@ -30,7 +30,7 @@ import { PluginStateObject } from '../../../mol-plugin-state/objects';
 import { parseSegmentKey } from './volseg-api/utils';
 import React from 'react';
 import { VolsegGeometricSegmentation } from './shape_primitives';
-import { VolsegMeshSegmentation } from '../new-meshes/mesh-extension';
+import { VolsegMeshSegmentation } from '../meshes/mesh-extension';
 import { findNodesByRef } from '../common';
 import { DescriptionsList, EntryDescriptionUI, SelectedSegmentDescription } from '../common-ui';
 import { JSONEditorComponent } from './jsoneditor-component';
