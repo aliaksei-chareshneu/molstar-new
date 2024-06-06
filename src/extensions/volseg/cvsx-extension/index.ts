@@ -5,13 +5,14 @@
  */
 
 import { PluginStateObject } from '../../../mol-plugin-state/objects';
+import { PluginUIContext } from '../../../mol-plugin-ui/context';
 import { PluginContext } from '../../../mol-plugin/context';
 import { StateObjectRef } from '../../../mol-state';
 import { GEOMETRIC_SEGMENTATION_NODE_TAG, MESH_SEGMENTATION_NODE_TAG, LATTICE_SEGMENTATION_NODE_TAG, VOLUME_NODE_TAG } from '../volumes-and-segmentations/entry-root';
 import { ProjectGeometricSegmentationData, ProjectGeometricSegmentationDataParamsValues, ProjectLatticeSegmentationDataParamsValues, ProjectMeshData, ProjectMeshSegmentationDataParamsValues, ProjectSegmentationData, ProjectVolumeData, VolsegEntryFromFile, VolsegGlobalStateFromFile, VolsegStateFromEntry } from '../volumes-and-segmentations/transformers';
 import { getSegmentLabelsFromDescriptions } from '../volumes-and-segmentations/volseg-api/utils';
 
-export async function loadCVSXFromAnything(plugin: PluginContext, data: StateObjectRef<PluginStateObject.Data.Binary | PluginStateObject.Data.String>) {
+export async function loadCVSXFromAnything(plugin: PluginUIContext | PluginContext, data: StateObjectRef<PluginStateObject.Data.Binary | PluginStateObject.Data.String>) {
     await plugin.build().to(data).apply(VolsegGlobalStateFromFile, {}, { state: { isGhost: true } }).commit();
 
     const entryNode = await plugin.build().to(data).apply(VolsegEntryFromFile).commit();
