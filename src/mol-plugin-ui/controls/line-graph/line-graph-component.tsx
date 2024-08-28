@@ -135,7 +135,6 @@ class TFButton extends React.Component<any> {
 export function areControlPointsColorsSame(newControlPoints: ControlPoint[], oldControlPoints: ControlPoint[]) {
     const newSorted = newControlPoints.sort((a, b) => a.index - b.index);
     const oldSorted = oldControlPoints.sort((a, b) => a.index - b.index);
-    debugger;
     for (let i = 0, il = newSorted.length; i < il; ++i) {
         const newPoint = newSorted[i];
         const oldPoint = oldSorted[i];
@@ -176,10 +175,10 @@ interface VolumeDescriptiveStatistics {
 interface LineGraphComponentState {
     points: ControlPoint[],
     copyPoint: any,
-    canSelectMultiple: boolean,
+    lineGraphCustomParams: LineGraphCustomParamsValues,
     showColorPicker: boolean,
-    // colored: boolean,
-    clickedPointIds?: UUID[]
+    clickedPointIds?: UUID[],
+    shiftPressed: boolean
 }
 
 const startEndPoints = [
@@ -223,7 +222,14 @@ export const GaussianTFParams = {
     gaussianHeight: PD.Numeric(0.2, { min: 0, max: 1, step: 0.01 })
 };
 
+export const LineGraphCustomParams = {
+    selectMultiple: PD.Boolean(false),
+};
+
+
+
 export type GaussianTFParamsValues = PD.Values<typeof GaussianTFParams>;
+export type LineGraphCustomParamsValues = PD.Values<typeof LineGraphCustomParams>;
 
 export class LineGraphComponent extends React.Component<any, LineGraphComponentState> {
     private myRef: any;
@@ -243,7 +249,13 @@ export class LineGraphComponent extends React.Component<any, LineGraphComponentS
         this.state = {
             points: startEndPoints.concat(this.props.data),
             copyPoint: undefined,
-            canSelectMultiple: false,
+            // TODO: PD.Boolean in state?
+            lineGraphCustomParams: {
+                selectMultiple: false,
+            },
+            // selectMultiple: PD.Boolean(false),
+            // selectMultiple: false,
+            shiftPressed: false,
             showColorPicker: false,
             // colored: this.props.colored
         };
@@ -303,11 +315,12 @@ export class LineGraphComponent extends React.Component<any, LineGraphComponentS
         const b = gaussianCenter / TFextent;
         // const b = gaussianCenter * (mean + sigma) / TFextent;
         const c = gaussianExtent / TFextent;
+        const paddingNormalized = this.padding / this.width;
         // const l = (this.width * 2 * c / extent);
         console.log(a, b, c);
         switch (type) {
             case 'gaussian':
-                const gaussianPoints: ControlPoint[] = generateGaussianControlPoints(a, b, c, TFextent);
+                const gaussianPoints: ControlPoint[] = generateGaussianControlPoints(a, b, c, TFextent, paddingNormalized);
                 const currentPoints = this.state.points;
                 gaussianPoints.push(currentPoints[currentPoints.length - 1]);
                 gaussianPoints.unshift(currentPoints[0]);
@@ -374,6 +387,7 @@ export class LineGraphComponent extends React.Component<any, LineGraphComponentS
                 <>
                     <TFParamsWrapper onChange={this.setPredefinedTransferFunction} descriptiveStatistics={this.descriptiveStatistics}></TFParamsWrapper>
                     <Button onClick={this.deleteAllPoints}>Remove All Points</Button>
+                    <WaitingParameterControls params={LineGraphCustomParams} values={this.state.lineGraphCustomParams} onChangeValues={async next => { console.log(next); }} />
                 </>
             </div>,
             <div key="modal" id="modal-root" />
@@ -414,13 +428,13 @@ export class LineGraphComponent extends React.Component<any, LineGraphComponentS
         console.log('Points before color change', currentPoints);
         console.log('Points with color changed', newPoints);
         this.handleChangePoints(newPoints);
-        debugger;
     };
 
     private handleKeyDown = (event: any) => {
-        // TODO: set canSelectMultiple = true
-        if (event.key === 'Shift') {
-            this.setState({ canSelectMultiple: true });
+        if (event.key === 'Shift' && this.state.shiftPressed === false) {
+            // const selectMultiple = this.state.lineGraphCustomParams.selectMultiple;
+            this.setState({ shiftPressed: true });
+            // this.setState({ lineGraphCustomParams: { canSelectMuliple: true } });
             console.log('Shift is pressed');
             // TODO: allow to select another point
         } else {
@@ -429,10 +443,9 @@ export class LineGraphComponent extends React.Component<any, LineGraphComponentS
     };
 
     private handleKeyUp = (event: any) => {
-        // TODO: SET canSelectMultiple = fasle
-        this.setState({ canSelectMultiple: false });
-        if (event.shiftKey) {
-            // do something
+        if (event.key = 'Shift') {
+            const selectMultiple = this.state.lineGraphCustomParams.selectMultiple;
+            this.setState({ shiftPressed: false });
             console.log('Shift is released');
             // TODO: allow to select another point
         } else {
@@ -441,12 +454,18 @@ export class LineGraphComponent extends React.Component<any, LineGraphComponentS
     };
 
     private handleClick = (point: ControlPoint) => (event: any) => {
-        this.setState({ clickedPointIds: [point.id] });
-
-        if (this.state.canSelectMultiple) {
-            debugger;
-            if (event.shiftKey) return;
+        // this.setState({ clickedPointIds: [point.id] });
+        console.log('handle click');
+        console.log(this.state);
+        if (this.state.lineGraphCustomParams.selectMultiple && this.state.shiftPressed) {
+            // ability to select another one and return
+            const currentClickedPointIds = this.state.clickedPointIds;
+            const newClickedPointIds = currentClickedPointIds ? [...currentClickedPointIds, point.id] : [point.id];
+            this.setState({ clickedPointIds: newClickedPointIds });
+            console.log('newClickedPointIds', newClickedPointIds);
             // TODO: function to execute on this
+        } else {
+            this.setState({ clickedPointIds: [point.id] });
         }
 
         if (this.state.showColorPicker) {
@@ -483,7 +502,7 @@ export class LineGraphComponent extends React.Component<any, LineGraphComponentS
         if (index === 0 || index === this.state.points.length - 1) {
             return;
         }
-        if (this.state.canSelectMultiple) {
+        if (this.state.lineGraphCustomParams.selectMultiple) {
             return;
         }
 
@@ -560,7 +579,7 @@ export class LineGraphComponent extends React.Component<any, LineGraphComponentS
 
     private handlePointUpdate(event: any) {
         const selected = this.selectedPointId;
-        if (this.state.canSelectMultiple) {
+        if (this.state.lineGraphCustomParams.selectMultiple) {
             return;
         }
         if (selected === undefined || this.getPoint(selected).index === 0 || this.getPoint(selected).index === this.state.points.length - 1) {
@@ -692,7 +711,7 @@ export class LineGraphComponent extends React.Component<any, LineGraphComponentS
         for (let i = 0; i < N; i++) {
             const fromValue = arrayMin(bins[i]);
             const toValue = arrayMax(bins[i]);
-            const x = this.width * i / (N - 1) + offset;
+            const x = this.width * i / (N - 1) + offset + this.padding;
             const y1 = this.height + offset;
             const y2 = this.height * (1 - histogram.counts[i] / max) + offset;
             bars.push(<line key={`histogram${i}`} x1={x} x2={x} y1={y1} y2={y2} stroke="#ded9ca" strokeWidth={w}>
@@ -784,13 +803,13 @@ export class LineGraphComponent extends React.Component<any, LineGraphComponentS
         const max = this.descriptiveStatistics.max;
         const sigma = this.descriptiveStatistics.sigma;
         const extent = max - min;
-        const x = this.width * (mean / extent);
+        const x = this.width * (mean / extent) + this.padding;
         const w = offset / 10;
         const bars = [];
         const y1 = this.height + offset;
         const y2 = 0;
-        const xPositive = this.width * ((mean + sigma) / extent);
-        const xNegative = this.width * ((mean - sigma) / extent);
+        const xPositive = this.width * ((mean + sigma) / extent) + this.padding;
+        const xNegative = this.width * ((mean - sigma) / extent) + this.padding;
         bars.push(
             <line key={'meanBar'} x1={x} x2={x} y1={y1} y2={y2} stroke="#808080" strokeDasharray="5, 5" strokeWidth={w}>
                 <title>Mean: {mean}</title>
@@ -798,9 +817,9 @@ export class LineGraphComponent extends React.Component<any, LineGraphComponentS
         bars.push(<line key={'positiveSigmaBar'} x1={xPositive} x2={xPositive} y1={y1} y2={y2} stroke="#808080" strokeWidth={w}>
             <title>+ Sigma: {sigma}</title>
         </line>);
-        bars.push(<line key={'negativeSigmaBar'} x1={xNegative} x2={xNegative} y1={y1} y2={y2} stroke="#808080" strokeWidth={w}>
-            <title>- Sigma: {-sigma}</title>
-        </line>);
+        // bars.push(<line key={'negativeSigmaBar'} x1={xNegative} x2={xNegative} y1={y1} y2={y2} stroke="#808080" strokeWidth={w}>
+        //     <title>- Sigma: {-sigma}</title>
+        // </line>);
         return bars;
     }
 

@@ -36,21 +36,21 @@ const VolumeBox = Box();
 
 export const defaultControlPoints = generateControlPoints(ColorNames.black);
 
-function generateNormalizedGaussianPositions(numberOfPoints: number, a: number, b: number, c: number, TFextent: number): Vec2[] {
+function generateNormalizedGaussianPositions(numberOfPoints: number, a: number, b: number, c: number, TFextent: number, padding: number): Vec2[] {
     const arr: Vec2[] = [];
     const center = b * TFextent;
     const extent = c * TFextent;
     // kind of 3 sigma
     const start = center - 3 * extent;
     const end = center + 3 * extent;
+    // TODO: make it start from this.padding instead of 0, basically pass in the shifted center
     const interval = ((end - start) / (numberOfPoints - 1)) / TFextent;
     for (let i = 0; i < numberOfPoints; i ++) {
         const x = start / TFextent + (interval * i);
         // const x = start + (interval * i);
+        // normalize padding by TFExtent I suppose or by width or something
         const y = gaussianParametrized(x, a, b, c);
-        // vectors are created on the space of HTML canvas
-        // so it should be normalized somehow
-        const vector = Vec2.create(x, y);
+        const vector = Vec2.create(x + padding, y);
         arr.push(vector);
         console.log(arr);
     }
@@ -71,9 +71,9 @@ function gaussianParametrized(x: number, a: number, b: number, c: number) {
     return y;
 }
 
-export function generateGaussianControlPoints(a: number, b: number, c: number, TFextent: number) {
+export function generateGaussianControlPoints(a: number, b: number, c: number, TFextent: number, padding: number) {
     const numberOfPoints = 8;
-    const positions = generateNormalizedGaussianPositions(numberOfPoints, a, b, c, TFextent);
+    const positions = generateNormalizedGaussianPositions(numberOfPoints, a, b, c, TFextent, padding);
     const controlPoints = generateControlPoints(ColorNames.black, positions);
     return controlPoints;
 }
