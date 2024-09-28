@@ -24,6 +24,7 @@ export const StructureTypeT = literal('model', 'assembly', 'symmetry', 'symmetry
 /** `source` parameter values for `raw_volume` node in MVS tree */
 // TODO: other types
 export const RawVolumeSourceT = literal('map');
+export const RawSegmentationSourceT = literal('sff');
 
 /** Keys (strings) correspond to sequential channel IDs (e.g., “0”, “1”), determined automatically while parsing the raw input file(s), and values (strings) correspond to custom user-defined channel IDs (e.g., “golgi”, “neurons”, “nucleus”). */
 // export const ChannelIdsMappingT = new iots.DictionaryType('Channel IDs mapping', );
@@ -72,7 +73,14 @@ export const Matrix = list(float);
 /** `options` parameter values for `raw_volume` node in MVS tree */
 export const RawVolumeOptionsT = iots.partial({
     voxel_size: Vector3,
+    // TODO: type for this?
     channel_ids_mapping: iots.any
+});
+
+export const RawSegmentationOptionsT = iots.partial({
+    blockHeader: blockHeaderParam,
+    segmentLabels: PD.ObjectList({ id: PD.Numeric(-1), label: PD.Text('') }, s => `${s.id} = ${s.label}`, { description: 'Mapping of segment IDs to segment labels' }),
+    ownerId: PD.Text('', { isHidden: true, description: 'Reference to the object which manages this volume' })
 });
 
 

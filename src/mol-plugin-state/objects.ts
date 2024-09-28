@@ -26,6 +26,7 @@ import { Color } from '../mol-util/color/color';
 import { Asset } from '../mol-util/assets';
 import { PrmtopFile } from '../mol-io/reader/prmtop/parser';
 import { TopFile } from '../mol-io/reader/top/parser';
+import { SffFile } from '../mol-io/reader/sff/schema';
 
 export type TypeClass = 'root' | 'data' | 'prop'
 
@@ -80,7 +81,7 @@ export namespace PluginStateObject {
         export class Ccp4 extends Create<Ccp4File>({ name: 'CCP4/MRC/MAP File', typeClass: 'Data' }) { }
         export class Dsn6 extends Create<Dsn6File>({ name: 'DSN6/BRIX File', typeClass: 'Data' }) { }
         export class Dx extends Create<DxFile>({ name: 'DX File', typeClass: 'Data' }) { }
-
+        export class Sff extends Create<SffFile>({ name: 'SFF File', typeClass: 'Data' }) { }
         export type BlobEntry = { id: string } & (
             { kind: 'json', data: unknown } |
             { kind: 'string', data: string } |

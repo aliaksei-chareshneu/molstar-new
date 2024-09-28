@@ -163,6 +163,46 @@ const VolumeFromDensityServerCif = PluginStateTransform.BuiltIn({
     }
 });
 
+
+type SegmentationFromSFF = typeof SegmentationFromSFF
+const SegmentationFromSFF = PluginStateTransform.BuiltIn({
+    name: 'segmentation-from-sff',
+    display: { name: 'Segmentation from EMDB SFF' },
+    from: SO.Format.Sff,
+    to: SO.Volume.Data,
+    params(a) {
+        // TODO: change
+        const blockHeaderParam = PD.Optional(PD.Text(void 0, { description: 'Header of the block to parse. If none is specifed, the 1st data block in the file is used.' }));
+        return {
+            blockHeader: blockHeaderParam,
+            segmentLabels: PD.ObjectList({ id: PD.Numeric(-1), label: PD.Text('') }, s => `${s.id} = ${s.label}`, { description: 'Mapping of segment IDs to segment labels' }),
+            ownerId: PD.Text('', { isHidden: true, description: 'Reference to the object which manages this volume' }),
+        };
+    }
+})({
+    // TODO: modify
+    isApplicable: a => a.data.primary_descriptor !== void 0,
+    apply({ a, params }) {
+        return Task.create('Parse SFF', async ctx => {
+            const header = params.blockHeader// || a.data.blocks[1].header; // zero block contains query meta-data
+            // const block = a.data.blocks.find(b => b.header === header);
+            // if (!block) throw new Error(`Data block '${[header]}' not found.`);
+            const segmentationCif = CIF.schema.segmentation(block);
+            const segmentLabels: { [id: number]: string } = {};
+            for (const segment of params.segmentLabels) segmentLabels[segment.id] = segment.label;
+            const volume = await volumeFromSegmentationData(segmentationCif, { segmentLabels, ownerId: params.ownerId }).runInContext(ctx);
+            const [x, y, z] = volume.grid.cells.space.dimensions;
+            const props = { label: segmentationCif.volume_data_3d_info.name.value(0), description: `Segmentation ${x}\u00D7${y}\u00D7${z}` };
+            return new SO.Volume.Data(volume, props);
+        });
+    },
+    dispose({ b }) {
+        b?.data.customProperties.dispose();
+    }
+});
+
+
+
 type VolumeFromSegmentationCif = typeof VolumeFromSegmentationCif
 const VolumeFromSegmentationCif = PluginStateTransform.BuiltIn({
     name: 'volume-from-segmentation-cif',

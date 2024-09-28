@@ -6,7 +6,7 @@
 
 import { OptionalField, RequiredField, float, int, list, nullable, str, tuple, union } from '../generic/params-schema';
 import { NodeFor, TreeFor, TreeSchema, TreeSchemaWithAllRequired } from '../generic/tree-schema';
-import { ColorT, ComponentExpressionT, ComponentSelectorT, Matrix, ParseFormatT, RawVolumeOptionsT, RawVolumeSourceT, RepresentationTypeT, SchemaFormatT, SchemaT, StructureTypeT, Vector3, VolumeRepresentationTypeT } from './param-types';
+import { ColorT, ComponentExpressionT, ComponentSelectorT, Matrix, ParseFormatT, RawSegmentationOptionsT, RawSegmentationSourceT, RawVolumeOptionsT, RawVolumeSourceT, RepresentationTypeT, SchemaFormatT, SchemaT, StructureTypeT, Vector3, VolumeRepresentationTypeT } from './param-types';
 
 
 const _DataFromUriParams = {
@@ -76,6 +76,14 @@ export const MVSTreeSchema = TreeSchema({
             params: {
                 source: RequiredField(RawVolumeSourceT, 'Specifies the type of the raw input file with volumetric data (“map” for electron density maps, “omezarr” of OME NGFF in OMEZarr format, “ometiff” for OME TIFF image files, “tiff_stack” for a stack (i.e., a large number of) TIFF files).'),
                 options: OptionalField(RawVolumeOptionsT, 'Specifies the desired voxel size and custom channel IDs in case of multichannel raw input data (e.g., OMEZarr with multiple channels).')
+            }
+        },
+        raw_segmentation: {
+            description: 'This node instructs to create a segmentation from a parsed data resource. "raw_segmentation" refers to an internal representation of segmentation data without any visual representation.',
+            parent: ['parse'],
+            params: {
+                source: RequiredField(RawSegmentationSourceT, 'Specifies the type of the raw input file with segmentation data ("sff" for EMDB SFF)'),
+                options: OptionalField(RawSegmentationOptionsT, 'Specifies the desired voxel size and custom segmentation IDs in case of multichannel raw input data (e.g., OMEZarr with multiple label groups).')
             }
         },
         /** This node instructs to create a structure from a parsed data resource. "Structure" refers to an internal representation of molecular coordinates without any visual representation. */
