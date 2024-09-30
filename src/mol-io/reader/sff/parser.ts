@@ -6,7 +6,7 @@
 
 import { ReaderResult as Result } from '../result';
 import { Task, RuntimeContext } from '../../../mol-task';
-import { PlyFile, PlyType, PlyElement, SffFile } from './schema';
+import { PlyType, SffFile } from './schema';
 import { Tokenizer, TokenBuilder, Tokens } from '../common/text/tokenizer';
 import { Column } from '../../../mol-data/db';
 import { TokenColumn } from '../common/text/column/token';
@@ -22,7 +22,7 @@ interface State {
 
     comments: string[]
     elementSpecs: ElementSpec[]
-    elements: PlyElement[]
+    // elements: PlyElement[]
 }
 
 type ColumnProperty = { kind: 'column', type: PlyType, name: string }
@@ -123,14 +123,14 @@ function parseHeader(state: State) {
     }
 }
 
-function parseElements(state: State) {
-    const { elementSpecs } = state;
-    for (let i = 0, il = elementSpecs.length; i < il; ++i) {
-        const spec = elementSpecs[i];
-        if (spec.kind === 'table') parseTableElement(state, spec);
-        else if (spec.kind === 'list') parseListElement(state, spec);
-    }
-}
+// function parseElements(state: State) {
+//     const { elementSpecs } = state;
+//     for (let i = 0, il = elementSpecs.length; i < il; ++i) {
+//         const spec = elementSpecs[i];
+//         if (spec.kind === 'table') parseTableElement(state, spec);
+//         // else if (spec.kind === 'list') parseListElement(state, spec);
+//     }
+// }
 
 function getColumnSchema(type: PlyType): Column.Schema {
     switch (type) {
@@ -143,106 +143,107 @@ function getColumnSchema(type: PlyType): Column.Schema {
     }
 }
 
-function parseTableElement(state: State, spec: TableElementSpec) {
-    const { elements, tokenizer } = state;
-    const { count, properties } = spec;
-    const propertyCount = properties.length;
-    const propertyNames: string[] = [];
-    const propertyTypes: PlyType[] = [];
-    const propertyTokens: Tokens[] = [];
-    const propertyColumns = new Map<string, Column<number>>();
+// function parseTableElement(state: State, spec: TableElementSpec) {
+//     // const { elements, tokenizer } = state;
+//     const { count, properties } = spec;
+//     const propertyCount = properties.length;
+//     const propertyNames: string[] = [];
+//     const propertyTypes: PlyType[] = [];
+//     const propertyTokens: Tokens[] = [];
+//     const propertyColumns = new Map<string, Column<number>>();
 
-    for (let i = 0, il = propertyCount; i < il; ++i) {
-        const tokens = TokenBuilder.create(tokenizer.data, count * 2);
-        propertyTokens.push(tokens);
-    }
+//     for (let i = 0, il = propertyCount; i < il; ++i) {
+//         const tokens = TokenBuilder.create(tokenizer.data, count * 2);
+//         propertyTokens.push(tokens);
+//     }
 
-    for (let i = 0, il = count; i < il; ++i) {
-        for (let j = 0, jl = propertyCount; j < jl; ++j) {
-            Tokenizer.skipWhitespace(tokenizer);
-            Tokenizer.markStart(tokenizer);
-            Tokenizer.eatValue(tokenizer);
-            TokenBuilder.addUnchecked(propertyTokens[j], tokenizer.tokenStart, tokenizer.tokenEnd);
-        }
-    }
+//     for (let i = 0, il = count; i < il; ++i) {
+//         for (let j = 0, jl = propertyCount; j < jl; ++j) {
+//             Tokenizer.skipWhitespace(tokenizer);
+//             Tokenizer.markStart(tokenizer);
+//             Tokenizer.eatValue(tokenizer);
+//             TokenBuilder.addUnchecked(propertyTokens[j], tokenizer.tokenStart, tokenizer.tokenEnd);
+//         }
+//     }
 
-    for (let i = 0, il = propertyCount; i < il; ++i) {
-        const { type, name } = properties[i];
-        const column = TokenColumn(propertyTokens[i], getColumnSchema(type));
-        propertyNames.push(name);
-        propertyTypes.push(type);
-        propertyColumns.set(name, column);
-    }
+//     for (let i = 0, il = propertyCount; i < il; ++i) {
+//         const { type, name } = properties[i];
+//         const column = TokenColumn(propertyTokens[i], getColumnSchema(type));
+//         propertyNames.push(name);
+//         propertyTypes.push(type);
+//         propertyColumns.set(name, column);
+//     }
 
-    elements.push({
-        kind: 'table',
-        rowCount: count,
-        propertyNames,
-        propertyTypes,
-        getProperty: (name: string) => propertyColumns.get(name)
-    });
-}
+//     elements.push({
+//         kind: 'table',
+//         rowCount: count,
+//         propertyNames,
+//         propertyTypes,
+//         getProperty: (name: string) => propertyColumns.get(name)
+//     });
+// }
 
-function parseListElement(state: State, spec: ListElementSpec) {
-    const { elements, tokenizer } = state;
-    const { count, property } = spec;
+// function parseListElement(state: State, spec: ListElementSpec) {
+//     // const { elements, tokenizer } = state;
+//     const { count, property } = spec;
 
-    // initial tokens size assumes triangle index data
-    const tokens = TokenBuilder.create(tokenizer.data, count * 2 * 3);
+//     // initial tokens size assumes triangle index data
+//     // const tokens = TokenBuilder.create(tokenizer.data, count * 2 * 3);
 
-    const offsets = new Uint32Array(count + 1);
-    let entryCount = 0;
+//     const offsets = new Uint32Array(count + 1);
+//     let entryCount = 0;
 
-    for (let i = 0, il = count; i < il; ++i) {
-        Tokenizer.skipWhitespace(tokenizer);
-        Tokenizer.markStart(tokenizer);
-        while (Tokenizer.skipWhitespace(tokenizer) !== 10) {
-            ++entryCount;
-            Tokenizer.markStart(tokenizer);
-            Tokenizer.eatValue(tokenizer);
-            TokenBuilder.addToken(tokens, tokenizer);
-        }
-        offsets[i + 1] = entryCount;
-    }
+//     for (let i = 0, il = count; i < il; ++i) {
+//         Tokenizer.skipWhitespace(tokenizer);
+//         Tokenizer.markStart(tokenizer);
+//         while (Tokenizer.skipWhitespace(tokenizer) !== 10) {
+//             ++entryCount;
+//             Tokenizer.markStart(tokenizer);
+//             Tokenizer.eatValue(tokenizer);
+//             TokenBuilder.addToken(tokens, tokenizer);
+//         }
+//         offsets[i + 1] = entryCount;
+//     }
 
-    /** holds row value entries transiently */
-    const listValue = {
-        entries: [] as number[],
-        count: 0
-    };
+//     /** holds row value entries transiently */
+//     const listValue = {
+//         entries: [] as number[],
+//         count: 0
+//     };
 
-    const column = TokenColumn(tokens, getColumnSchema(property.dataType));
+//     const column = TokenColumn(tokens, getColumnSchema(property.dataType));
 
-    elements.push({
-        kind: 'list',
-        rowCount: count,
-        name: property.name,
-        type: property.dataType,
-        value: (row: number) => {
-            const offset = offsets[row] + 1;
-            const count = column.value(offset - 1);
-            for (let i = offset, il = offset + count; i < il; ++i) {
-                listValue.entries[i - offset] = column.value(i);
-            }
-            listValue.count = count;
-            return listValue;
-        }
-    });
-}
+//     elements.push({
+//         kind: 'list',
+//         rowCount: count,
+//         name: property.name,
+//         type: property.dataType,
+//         value: (row: number) => {
+//             const offset = offsets[row] + 1;
+//             const count = column.value(offset - 1);
+//             for (let i = offset, il = offset + count; i < il; ++i) {
+//                 listValue.entries[i - offset] = column.value(i);
+//             }
+//             listValue.count = count;
+//             return listValue;
+//         }
+//     });
+// }
 
-async function parseInternal(data: string, ctx: RuntimeContext): Promise<Result<SffFile>> {
+async function parseInternal(data: string, ctx: RuntimeContext, name: string): Promise<Result<SffFile>> {
     // const state = State(data, ctx);
+    // TODO: use name
     ctx.update({ message: 'Parsing...', current: 0, max: data.length });
     // parseHeader(state);
     // parseElements(state);
     // const { elements, elementSpecs, comments } = state;
     // const elementNames = elementSpecs.map(s => s.name);
-    const result = SffFile();
+    const result = SffFile(data);
     return Result.success(result);
 }
 
-export function parseSff(data: string) {
+export function parse(data: string, name: string) {
     return Task.create<Result<SffFile>>('Parse SFF', async ctx => {
-        return await parseInternal(data, ctx);
+        return await parseInternal(data, ctx, name);
     });
 }

@@ -3,7 +3,7 @@
  *
  * @author Adam Midlik <midlik@gmail.com>
  */
-
+import * as CCP4 from '../../mol-io/reader/ccp4/parser';
 import { Mat3, Mat4, Vec3 } from '../../mol-math/linear-algebra';
 import { StructureComponentParams } from '../../mol-plugin-state/helpers/structure-component';
 import { StructureFromModel, TransformStructureConformation } from '../../mol-plugin-state/transforms/model';
@@ -97,6 +97,14 @@ export const UpdateTarget = {
         const ref = target.refManager.getChildRef(target.selector, refSuffix);
         const msResult = target.update.to(target.selector).apply(transformer, params, { ...options, ref }).selector;
         return { ...target, selector: msResult };
+    },
+    _get_volume_info(target: UpdateTarget): UpdateTarget {
+        // TODO
+        debugger;
+        const label = 'volume';
+        // const data = Uint8Array.;
+        // const parsed = CCP4.parse(data, label);
+        return target;
     },
     /** Delete all children of `target.selector`. */
     deleteChildren(target: UpdateTarget): UpdateTarget {
@@ -314,15 +322,15 @@ export function rawVolumeProps(node: MolstarNode<'raw_volume'>): StateTransforme
     };
     // TODO: support channel_ids_mapping when other volume types (e.g., omezarr) are implemented
 }
-/** Create props for `VolumeFromSegmentationCif` transformer from a raw_segmentation node. */
-export function rawSegmentationProps(node: MolstarNode<'raw_segmentation'>): StateTransformer.Params<VolumeFromSegmentationCif> | {} {
-    const params = node.params;
-    if (!params.options || !params.options.voxel_size) return {};
-    return {
-        voxelSize: params.options.voxel_size
-    };
-    // TODO: support segmentation_ids_mapping when other segmentation types (e.g., omezarr) are implemented
-}
+/** TODO: updated Create props for `VolumeFromSegmentationCif` transformer from a raw_volume_and_segmentation node. */
+// export function rawVolumeAndSegmentationProps(node: MolstarNode<'raw_volume_and_segmentation'>): StateTransformer.Params<VolumeFromSegmentationCif> | {} {
+//     const params = node.params;
+//     // if (!params. || !params.options.voxel_size) return {};
+//     // return {
+//     //     voxelSize: params.options.voxel_size
+//     // };
+//     // TODO: support segmentation_ids_mapping when other segmentation types (e.g., omezarr) are implemented
+// }
 /** Create props for `StructureFromModel` transformer from a structure node. */
 export function structureProps(node: MolstarNode<'structure'>): StateTransformer.Params<StructureFromModel> {
     const params = node.params;

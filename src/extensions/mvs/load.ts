@@ -6,10 +6,12 @@
  * @author Aliaksei Chareshneu <chareshneu.tech@gmail.com>
  */
 
-import { Download, ParseCcp4, ParseCif } from '../../mol-plugin-state/transforms/data';
+import { DensityServer_Data_Schema } from '../../mol-io/reader/cif/schema/density-server';
+import { Segmentation_Data_Database } from '../../mol-io/reader/cif/schema/segmentation';
+import { Download, ParseCcp4, ParseCif, ParseSFF } from '../../mol-plugin-state/transforms/data';
 import { CustomModelProperties, CustomStructureProperties, ModelFromTrajectory, StructureComponent, StructureFromModel, TrajectoryFromMmCif, TrajectoryFromPDB, TransformStructureConformation } from '../../mol-plugin-state/transforms/model';
 import { StructureRepresentation3D, VolumeRepresentation3D } from '../../mol-plugin-state/transforms/representation';
-import { VolumeFromCcp4, VolumeFromSegmentationCif } from '../../mol-plugin-state/transforms/volume';
+import { VolumeFromCcp4 } from '../../mol-plugin-state/transforms/volume';
 import { PluginCommands } from '../../mol-plugin/commands';
 import { PluginContext } from '../../mol-plugin/context';
 import { StateObjectSelector } from '../../mol-state';
@@ -21,7 +23,7 @@ import { MVSAnnotationTooltipsProvider } from './components/annotation-tooltips-
 import { CustomLabelProps, CustomLabelRepresentationProvider } from './components/custom-label/representation';
 import { CustomTooltipsProvider } from './components/custom-tooltips-prop';
 import { IsMVSModelProps, IsMVSModelProvider } from './components/is-mvs-model-prop';
-import { AnnotationFromSourceKind, AnnotationFromUriKind, LoadingActions, UpdateTarget, collectAnnotationReferences, collectAnnotationTooltips, collectInlineLabels, collectInlineTooltips, colorThemeForNode, componentFromXProps, componentPropsFromSelector, isPhantomComponent, labelFromXProps, loadTree, makeNearestReprMap, prettyNameFromSelector, rawSegmentationProps, rawVolumeProps, representationProps, structureProps, transformProps, volumeRepresentationProps } from './load-helpers';
+import { AnnotationFromSourceKind, AnnotationFromUriKind, LoadingActions, UpdateTarget, collectAnnotationReferences, collectAnnotationTooltips, collectInlineLabels, collectInlineTooltips, colorThemeForNode, componentFromXProps, componentPropsFromSelector, isPhantomComponent, labelFromXProps, loadTree, makeNearestReprMap, prettyNameFromSelector, rawVolumeProps, representationProps, structureProps, transformProps, volumeRepresentationProps } from './load-helpers';
 import { MVSData } from './mvs-data';
 import { ParamsOfKind, SubTreeOfKind, validateTree } from './tree/generic/tree-schema';
 import { convertMvsToMolstar, mvsSanityCheck } from './tree/molstar/conversion';
@@ -92,8 +94,8 @@ export interface MolstarLoadingContext {
     nearestReprMap?: Map<MolstarNode, MolstarNode<'representation'>>,
     focus?: { kind: 'camera', params: ParamsOfKind<MolstarTree, 'camera'> } | { kind: 'focus', focusTarget: StateObjectSelector, params: ParamsOfKind<MolstarTree, 'focus'> },
     canvas?: ParamsOfKind<MolstarTree, 'canvas'>,
+    volume_data_3d_info?: DensityServer_Data_Schema['volume_data_3d_info']
 }
-
 
 /** Loading actions for loading a `MolstarTree`, per node kind. */
 const MolstarLoadingActions: LoadingActions<MolstarTree, MolstarLoadingContext> = {
@@ -114,9 +116,11 @@ const MolstarLoadingActions: LoadingActions<MolstarTree, MolstarLoadingContext> 
         } else if (format === 'pdb') {
             return updateParent;
         } else if (format === 'map') {
-            // return updateParent;
-            // return UpdateTarget.apply(updateParent, ParseCif, {});
+            const t = UpdateTarget._get_volume_info(updateParent);
+            debugger;
             return UpdateTarget.apply(updateParent, ParseCcp4, {});
+        } else if (format === 'map_and_sff') {
+            return UpdateTarget.apply(updateParent, ParseSFF, {});
         } else {
             console.error(`Unknown format in "parse" node: "${format}"`);
             return undefined;
@@ -159,11 +163,13 @@ const MolstarLoadingActions: LoadingActions<MolstarTree, MolstarLoadingContext> 
         // TODO: tooltips, labels, etc.
         return rawVolume;
     },
-    raw_segmentation(updateParent: UpdateTarget, node: SubTreeOfKind<MolstarTree, 'raw_segmentation'>, context: MolstarLoadingContext): UpdateTarget {
-        const props = rawSegmentationProps(node);
-        const rawSegmentation = UpdateTarget.apply(updateParent, VolumeFromSegmentationCif, props);
+    raw_volume_and_segmentation(updateParent: UpdateTarget, node: SubTreeOfKind<MolstarTree, 'raw_volume_and_segmentation'>, context: MolstarLoadingContext): UpdateTarget {
+        // const props = rawVolumeAndSegmentationProps(node);
+        const props = {};
+        const rawVolume = UpdateTarget.apply(updateParent, VolumeFromCcp4, props);
+        // const rawSegmentation = UpdateTarget.apply(rawVolume, VolumeFromSFF, props);
         // TODO: tooltips, labels, etc.
-        return rawSegmentation;
+        return rawVolume;
     },
     structure(updateParent: UpdateTarget, node: SubTreeOfKind<MolstarTree, 'structure'>, context: MolstarLoadingContext): UpdateTarget {
         const props = structureProps(node);

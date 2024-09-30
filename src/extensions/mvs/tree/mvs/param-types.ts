@@ -11,11 +11,11 @@ import { ColorNames } from '../../../../mol-util/color/names';
 
 
 /** `format` parameter values for `parse` node in MVS tree */
-export const ParseFormatT = literal('mmcif', 'bcif', 'pdb', 'map');
+export const ParseFormatT = literal('mmcif', 'bcif', 'pdb', 'map', 'map_and_sff');
 export type ParseFormatT = ValueFor<typeof ParseFormatT>
 
 /** `format` parameter values for `parse` node in Molstar tree */
-export const MolstarParseFormatT = literal('cif', 'pdb', 'map');
+export const MolstarParseFormatT = literal('cif', 'pdb', 'map', 'map_and_sff');
 export type MolstarParseFormatT = ValueFor<typeof MolstarParseFormatT>
 
 /** `kind` parameter values for `structure` node in MVS tree */
@@ -57,6 +57,9 @@ export const RepresentationTypeT = literal('ball_and_stick', 'cartoon', 'surface
 /** `type` parameter values for `volume_representation` node in MVS tree */
 export const VolumeRepresentationTypeT = literal('isosurface', 'direct_volume', 'slice');
 
+/** `type` parameter values for `volume_and_segmentation_representation` node in MVS tree */
+export const SegmentationRepresentationTypeT = literal('lattice');
+
 /** `schema` parameter values for `*_from_uri` and `*_from_source` nodes in MVS tree */
 export const SchemaT = literal('whole_structure', 'entity', 'chain', 'auth_chain', 'residue', 'auth_residue', 'residue_range', 'auth_residue_range', 'atom', 'auth_atom', 'all_atomic');
 
@@ -78,9 +81,10 @@ export const RawVolumeOptionsT = iots.partial({
 });
 
 export const RawSegmentationOptionsT = iots.partial({
-    blockHeader: blockHeaderParam,
-    segmentLabels: PD.ObjectList({ id: PD.Numeric(-1), label: PD.Text('') }, s => `${s.id} = ${s.label}`, { description: 'Mapping of segment IDs to segment labels' }),
-    ownerId: PD.Text('', { isHidden: true, description: 'Reference to the object which manages this volume' })
+    // TODO:
+    // blockHeader: blockHeaderParam,
+    // segmentLabels: PD.ObjectList({ id: PD.Numeric(-1), label: PD.Text('') }, s => `${s.id} = ${s.label}`, { description: 'Mapping of segment IDs to segment labels' }),
+    // ownerId: PD.Text('', { isHidden: true, description: 'Reference to the object which manages this volume' })
 });
 
 

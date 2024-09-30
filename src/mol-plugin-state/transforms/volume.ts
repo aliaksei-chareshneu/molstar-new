@@ -20,6 +20,7 @@ import { Grid, Volume } from '../../mol-model/volume';
 import { PluginContext } from '../../mol-plugin/context';
 import { StateSelection } from '../../mol-state';
 import { volumeFromSegmentationData } from '../../mol-model-formats/volume/segmentation';
+import { Segmentation_Data_Schema } from '../../mol-io/reader/cif/schema/segmentation';
 
 export { VolumeFromCcp4 };
 export { VolumeFromDsn6 };
@@ -164,42 +165,72 @@ const VolumeFromDensityServerCif = PluginStateTransform.BuiltIn({
 });
 
 
-type SegmentationFromSFF = typeof SegmentationFromSFF
-const SegmentationFromSFF = PluginStateTransform.BuiltIn({
-    name: 'segmentation-from-sff',
-    display: { name: 'Segmentation from EMDB SFF' },
-    from: SO.Format.Sff,
-    to: SO.Volume.Data,
-    params(a) {
-        // TODO: change
-        const blockHeaderParam = PD.Optional(PD.Text(void 0, { description: 'Header of the block to parse. If none is specifed, the 1st data block in the file is used.' }));
-        return {
-            blockHeader: blockHeaderParam,
-            segmentLabels: PD.ObjectList({ id: PD.Numeric(-1), label: PD.Text('') }, s => `${s.id} = ${s.label}`, { description: 'Mapping of segment IDs to segment labels' }),
-            ownerId: PD.Text('', { isHidden: true, description: 'Reference to the object which manages this volume' }),
-        };
-    }
-})({
-    // TODO: modify
-    isApplicable: a => a.data.primary_descriptor !== void 0,
-    apply({ a, params }) {
-        return Task.create('Parse SFF', async ctx => {
-            const header = params.blockHeader// || a.data.blocks[1].header; // zero block contains query meta-data
-            // const block = a.data.blocks.find(b => b.header === header);
-            // if (!block) throw new Error(`Data block '${[header]}' not found.`);
-            const segmentationCif = CIF.schema.segmentation(block);
-            const segmentLabels: { [id: number]: string } = {};
-            for (const segment of params.segmentLabels) segmentLabels[segment.id] = segment.label;
-            const volume = await volumeFromSegmentationData(segmentationCif, { segmentLabels, ownerId: params.ownerId }).runInContext(ctx);
-            const [x, y, z] = volume.grid.cells.space.dimensions;
-            const props = { label: segmentationCif.volume_data_3d_info.name.value(0), description: `Segmentation ${x}\u00D7${y}\u00D7${z}` };
-            return new SO.Volume.Data(volume, props);
-        });
-    },
-    dispose({ b }) {
-        b?.data.customProperties.dispose();
-    }
-});
+// export type VolumeFromSFF = typeof VolumeFromSFF
+// export const VolumeFromSFF = PluginStateTransform.BuiltIn({
+//     name: 'segmentation-from-sff',
+//     display: { name: 'Segmentation from EMDB SFF' },
+//     from: SO.Format.Sff,
+//     to: SO.Volume.Data,
+//     params(a) {
+//         const segmentation: Segmentation_Data_Schema = {
+//             volume_data_3d_info: {
+//                 'name': "str",
+//                 // zero indexed axis order of the data
+//                 'axis_order': Vector(3, int),
+//                 // Origin in fractional coords
+//                 'origin': Vector(3),
+//                 // Dimension in fractional coords
+//                 'dimensions': Vector(3),
+//                 'sample_rate': int,
+//                 // number of samples along each axis
+//                 'sample_count': Vector(3, int),
+//                 'spacegroup_number': int,
+//                 'spacegroup_cell_size': Vector(3),
+//                 // angles in degrees
+//                 'spacegroup_cell_angles': Vector(3),
+//                 'mean_source': float,
+//                 'mean_sampled': float,
+//                 'sigma_source': float,
+//                 'sigma_sampled': float,
+//                 'min_source': float,
+//                 'min_sampled': float,
+//                 'max_source': float,
+//                 'max_sampled': float
+//             },
+//             segmentation_data_3d: {},
+//             segmentation_data_table: {}
+//         };
+//         return {
+//             segmentationSource: PD.objectToOptions()
+//         };
+//         // const blockHeaderParam = PD.Optional(PD.Text(void 0, { description: 'Header of the block to parse. If none is specifed, the 1st data block in the file is used.' }));
+//         // return {
+//         //     blockHeader: blockHeaderParam,
+//         //     segmentLabels: PD.ObjectList({ id: PD.Numeric(-1), label: PD.Text('') }, s => `${s.id} = ${s.label}`, { description: 'Mapping of segment IDs to segment labels' }),
+//         //     ownerId: PD.Text('', { isHidden: true, description: 'Reference to the object which manages this volume' }),
+//         // };
+//     }
+// })({
+//     // TODO: modify
+//     isApplicable: a => a.data.primary_descriptor !== void 0,
+//     apply({ a, params }) {
+//         return Task.create('Parse SFF', async ctx => {
+//             const header = params.blockHeader// || a.data.blocks[1].header; // zero block contains query meta-data
+//             // const block = a.data.blocks.find(b => b.header === header);
+//             // if (!block) throw new Error(`Data block '${[header]}' not found.`);
+//             // const segmentationCif = CIF.schema.segmentation(block);
+//             const segmentLabels: { [id: number]: string } = {};
+//             for (const segment of params.segmentLabels) segmentLabels[segment.id] = segment.label;
+//             const volume = await volumeFromSegmentationData(segmentationCif, { segmentLabels, ownerId: params.ownerId }).runInContext(ctx);
+//             const [x, y, z] = volume.grid.cells.space.dimensions;
+//             const props = { label: segmentationCif.volume_data_3d_info.name.value(0), description: `Segmentation ${x}\u00D7${y}\u00D7${z}` };
+//             return new SO.Volume.Data(volume, props);
+//         });
+//     },
+//     dispose({ b }) {
+//         b?.data.customProperties.dispose();
+//     }
+// });
 
 
 

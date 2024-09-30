@@ -5,7 +5,7 @@
  * @author Alexander Rose <alexander.rose@weirdbyte.de>
  * @author Neli Fonseca <neli@ebi.ac.uk>
  */
-
+import * as SFF from '../../mol-io/reader/sff/parser';
 import * as CCP4 from '../../mol-io/reader/ccp4/parser';
 import { CIF } from '../../mol-io/reader/cif';
 import * as DSN6 from '../../mol-io/reader/dsn6/parser';
@@ -46,6 +46,7 @@ export { ImportString };
 export { ImportJson };
 export { ParseJson };
 export { LazyVolume };
+export { ParseSFF };
 
 type Download = typeof Download
 const Download = PluginStateTransform.BuiltIn({
@@ -413,6 +414,23 @@ const ParseCcp4 = PluginStateTransform.BuiltIn({
             const parsed = await CCP4.parse(a.data, a.label).runInContext(ctx);
             if (parsed.isError) throw new Error(parsed.message);
             return new SO.Format.Ccp4(parsed.result);
+        });
+    }
+});
+
+type ParseSFF = typeof ParseSFF
+const ParseSFF = PluginStateTransform.BuiltIn({
+    name: 'parse-sff',
+    display: { name: 'Parse SFF', description: 'Parse SFF from String data' },
+    from: [SO.Data.String],
+    to: SO.Format.Sff
+})({
+    apply({ a }) {
+        return Task.create('Parse SFF', async ctx => {
+            const parsed = await SFF.parse(a.data, a.label).runInContext(ctx);
+            // const parsed = await CCP4.parse(a.data, a.label).runInContext(ctx);
+            if (parsed.isError) throw new Error(parsed.message);
+            return new SO.Format.Sff(parsed.result);
         });
     }
 });

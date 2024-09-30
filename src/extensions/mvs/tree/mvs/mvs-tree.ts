@@ -6,7 +6,7 @@
 
 import { OptionalField, RequiredField, float, int, list, nullable, str, tuple, union } from '../generic/params-schema';
 import { NodeFor, TreeFor, TreeSchema, TreeSchemaWithAllRequired } from '../generic/tree-schema';
-import { ColorT, ComponentExpressionT, ComponentSelectorT, Matrix, ParseFormatT, RawSegmentationOptionsT, RawSegmentationSourceT, RawVolumeOptionsT, RawVolumeSourceT, RepresentationTypeT, SchemaFormatT, SchemaT, StructureTypeT, Vector3, VolumeRepresentationTypeT } from './param-types';
+import { ColorT, ComponentExpressionT, ComponentSelectorT, Matrix, ParseFormatT, RawSegmentationOptionsT, RawSegmentationSourceT, RawVolumeOptionsT, RawVolumeSourceT, RepresentationTypeT, SchemaFormatT, SchemaT, SegmentationRepresentationTypeT, StructureTypeT, Vector3, VolumeRepresentationTypeT } from './param-types';
 
 
 const _DataFromUriParams = {
@@ -78,12 +78,13 @@ export const MVSTreeSchema = TreeSchema({
                 options: OptionalField(RawVolumeOptionsT, 'Specifies the desired voxel size and custom channel IDs in case of multichannel raw input data (e.g., OMEZarr with multiple channels).')
             }
         },
-        raw_segmentation: {
-            description: 'This node instructs to create a segmentation from a parsed data resource. "raw_segmentation" refers to an internal representation of segmentation data without any visual representation.',
+        /** This node instructs to create a volume and a segmentation from a parsed data resources */
+        raw_volume_and_segmentation: {
+            description: 'This node instructs to create a volume and a segmentation from a parsed data resources. "raw_volume_and_segmentation" refers to an internal representation of volumetric and segmentation data without any visual representation.',
             parent: ['parse'],
             params: {
-                source: RequiredField(RawSegmentationSourceT, 'Specifies the type of the raw input file with segmentation data ("sff" for EMDB SFF)'),
-                options: OptionalField(RawSegmentationOptionsT, 'Specifies the desired voxel size and custom segmentation IDs in case of multichannel raw input data (e.g., OMEZarr with multiple label groups).')
+                volume_source: RequiredField(RawVolumeSourceT, 'Specifies the type of the raw input file with volumetric data (“map” for electron density maps, “omezarr” of OME NGFF in OMEZarr format, “ometiff” for OME TIFF image files, “tiff_stack” for a stack (i.e., a large number of) TIFF files).'),
+                segmentation_source: RequiredField(RawSegmentationSourceT, 'Specifies the type of the raw input file with segmentation data ("sff" for EMDB SFF)')
             }
         },
         /** This node instructs to create a structure from a parsed data resource. "Structure" refers to an internal representation of molecular coordinates without any visual representation. */
@@ -163,8 +164,18 @@ export const MVSTreeSchema = TreeSchema({
             description: 'This node instructs to create a visual representation of a volume.',
             parent: ['raw_volume'],
             params: {
-                /** Method of visual representation of the component. */
+                /** Method of visual representation of the volume. */
                 type: RequiredField(VolumeRepresentationTypeT, 'Method of visual representation of the volume.'),
+            },
+        },
+        volume_and_segmentation_representation: {
+            description: 'This node instructs to create a visual representation of a segmentation.',
+            parent: ['raw_volume_and_segmentation'],
+            params: {
+                /** Method of visual representation of the volume. */
+                volume_type: RequiredField(VolumeRepresentationTypeT, 'Method of visual representation of the volume.'),
+                /** Method of visual representation of the segmentation. */
+                segmentation_type: RequiredField(SegmentationRepresentationTypeT, 'Method of visual representation of the segmentation.'),
             },
         },
         /** This node instructs to apply color to a visual representation. */
