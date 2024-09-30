@@ -92,7 +92,6 @@ export interface MolstarLoadingContext {
     nearestReprMap?: Map<MolstarNode, MolstarNode<'representation'>>,
     focus?: { kind: 'camera', params: ParamsOfKind<MolstarTree, 'camera'> } | { kind: 'focus', focusTarget: StateObjectSelector, params: ParamsOfKind<MolstarTree, 'focus'> },
     canvas?: ParamsOfKind<MolstarTree, 'canvas'>,
-    pluginContext?: PluginContext
 }
 
 
